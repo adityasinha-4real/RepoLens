@@ -20,7 +20,7 @@ const COPY: Record<string, { title: string; hint?: string }> = {
   },
   too_many_requests: {
     title: "Too many analyses",
-    hint: "This RepoLens instance limits analyses per client. Wait a minute and try again.",
+    hint: "This RepoLens instance limits analyses per client. Wait and try again.",
   },
   upstream_timeout: { title: "GitHub took too long to respond", hint: "Try again shortly." },
   upstream_error: { title: "GitHub returned an error", hint: "Try again shortly." },
@@ -29,6 +29,15 @@ const COPY: Record<string, { title: string; hint?: string }> = {
     hint: "The RepoLens backend could not be reached. It may be starting up or down.",
   },
   network_error: { title: "Network error" },
+  server_busy: {
+    title: "RepoLens is busy",
+    hint: "This instance limits how many analyses run at once. Try again in a minute.",
+  },
+  analysis_timeout: {
+    title: "The analysis took too long",
+    hint: "Very large repositories can exceed this instance's time limit.",
+  },
+  request_too_large: { title: "The request was too large" },
 };
 
 export function ErrorPanel({ error, onRetry }: { error: AnalysisError; onRetry?: () => void }) {

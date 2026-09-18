@@ -12,7 +12,14 @@ from pydantic import BaseModel
 
 from app.api.deps import GitHubDep, HttpDep, SettingsDep
 from app.core.config import APP_VERSION, Settings
-from app.core.errors import AIUnavailableError, RepoLensError
+from app.core.errors import (
+    AIUnavailableError,
+    AnalysisTimeoutError,
+    RepoLensError,
+    ServerBusyError,
+    TooManyRequestsError,
+)
+from app.core.rate_limit import client_id
 from app.schemas.ai import AIStatus, AISummary
 from app.schemas.report import AnalysisReport, AnalyzeRequest
 from app.schemas.repository import RepositoryMetadata
@@ -23,6 +30,7 @@ from app.services.snapshot import ProgressCallback, noop_progress
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api")
+SLOT_WAIT_SECONDS = 20
 
 
 class HealthResponse(BaseModel):
@@ -56,17 +64,65 @@ async def cached_analysis(
     settings: Settings,
     progress: ProgressCallback = noop_progress,
 ) -> AnalysisReport:
-    """Reuse a report produced within the cache TTL for the same repository."""
+    """Serve from cache, join an identical analysis already running, or run a new one within
+    the instance's concurrency and time limits."""
+    state = request.app.state
     key = parse_repository_url(repository_url).full_name.lower()
-    cache = request.app.state.report_cache
-    cached = cache.get(key)
+    cached = state.report_cache.get(key)
     if cached is not None:
         await progress("analyze", "Using a report generated in the last few minutes")
         return cached
-    report = await run_analysis(repository_url, http, settings, progress)
-    cache.set(key, report)
-    cache.set(report.repository.full_name.lower(), report)  # canonical name after renames
-    return report
+
+    inflight: dict[str, asyncio.Future[AnalysisReport]] = state.inflight
+    if key in inflight:
+        await progress("analyze", "Joining an identical analysis that is already running")
+        return await asyncio.shield(inflight[key])
+
+    future: asyncio.Future[AnalysisReport] = asyncio.get_running_loop().create_future()
+    # Retrieve the exception even when nobody joined, so asyncio does not log it as lost.
+    future.add_done_callback(lambda f: None if f.cancelled() else f.exception())
+    inflight[key] = future
+    try:
+        try:
+            await asyncio.wait_for(state.analysis_slots.acquire(), timeout=SLOT_WAIT_SECONDS)
+        except TimeoutError as exc:
+            raise ServerBusyError(
+                "RepoLens is busy with other analyses. Try again in a minute."
+            ) from exc
+        try:
+            report = await asyncio.wait_for(
+                run_analysis(repository_url, http, settings, progress),
+                timeout=settings.analysis_timeout_seconds,
+            )
+        except TimeoutError as exc:
+            raise AnalysisTimeoutError(
+                "The analysis took too long. Very large repositories may exceed the limit."
+            ) from exc
+        finally:
+            state.analysis_slots.release()
+        state.report_cache.set(key, report)
+        state.report_cache.set(report.repository.full_name.lower(), report)  # after renames
+        future.set_result(report)
+        return report
+    except asyncio.CancelledError:
+        future.set_exception(ServerBusyError("The analysis was interrupted. Please try again."))
+        raise
+    except Exception as exc:
+        future.set_exception(exc)
+        raise
+    finally:
+        inflight.pop(key, None)
+
+
+def enforce_rate_limit(request: Request, settings: Settings, kind: str) -> None:
+    limiter = request.app.state.ai_limiter if kind == "ai" else request.app.state.analysis_limiter
+    retry_after = limiter.check(client_id(request, settings.trust_proxy_headers))
+    if retry_after is not None:
+        what = "AI summaries" if kind == "ai" else "analyses"
+        raise TooManyRequestsError(
+            f"Too many {what} from your address. Try again in {retry_after} seconds.",
+            retry_after_seconds=retry_after,
+        )
 
 
 @router.post("/analyze", response_model=AnalysisReport)
@@ -74,6 +130,7 @@ async def analyze(
     body: AnalyzeRequest, request: Request, http: HttpDep, settings: SettingsDep
 ) -> AnalysisReport:
     """Analyze a public repository and return the complete report."""
+    enforce_rate_limit(request, settings, "analysis")
     return await cached_analysis(request, body.repository_url, http, settings)
 
 
@@ -97,6 +154,7 @@ async def analyze_stream(
       {"type": "result", "report": {...}}
       {"type": "error", "error": {"code": "...", "message": "...", "details": {...}}}
     """
+    enforce_rate_limit(request, settings, "analysis")  # before streaming: a real HTTP 429
     send, receive = anyio.create_memory_object_stream[dict](max_buffer_size=32)
 
     async def progress(stage: str, message: str) -> None:
@@ -166,6 +224,7 @@ async def ai_summary(
     provider = request.app.state.ai
     if provider is None:
         raise AIUnavailableError("AI summaries are not enabled on this RepoLens instance.")
+    enforce_rate_limit(request, settings, "ai")
     report = await cached_analysis(request, body.repository_url, http, settings)
     key = f"{report.repository.full_name.lower()}@{report.analysis.commit_sha}"
     cached = request.app.state.ai_cache.get(key)

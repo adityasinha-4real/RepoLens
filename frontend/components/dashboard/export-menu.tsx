@@ -40,7 +40,7 @@ export function ExportMenu({ report }: { report: AnalysisReport }) {
         <DownloadIcon size={14} /> Export
       </button>
       {open && (
-        <div role="menu" className="absolute right-0 z-30 mt-1 w-60 rounded-md border border-border bg-surface p-1 shadow-lg">
+        <div role="menu" className="absolute left-0 z-30 mt-1 w-60 lg:left-auto lg:right-0 rounded-md border border-border bg-surface p-1 shadow-lg">
           {OPTIONS.map((o) => (
             <button
               key={o.format}

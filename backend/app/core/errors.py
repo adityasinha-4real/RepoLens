@@ -73,3 +73,28 @@ class UpstreamTimeoutError(RepoLensError):
 class AIUnavailableError(RepoLensError):
     code = "ai_unavailable"
     status_code = 503
+
+
+class TooManyRequestsError(RepoLensError):
+    """This RepoLens instance's own per-client limit (distinct from GitHub's rate limit)."""
+
+    code = "too_many_requests"
+    status_code = 429
+
+    def __init__(self, message: str, *, retry_after_seconds: int) -> None:
+        super().__init__(message, details={"retry_after_seconds": retry_after_seconds})
+
+
+class ServerBusyError(RepoLensError):
+    code = "server_busy"
+    status_code = 503
+
+
+class AnalysisTimeoutError(RepoLensError):
+    code = "analysis_timeout"
+    status_code = 504
+
+
+class RequestTooLargeError(RepoLensError):
+    code = "request_too_large"
+    status_code = 413

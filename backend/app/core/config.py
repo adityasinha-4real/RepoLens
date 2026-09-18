@@ -26,7 +26,14 @@ class Settings(BaseSettings):
     max_total_fetch_bytes: int = Field(default=20_000_000, gt=0)
     fetch_concurrency: int = Field(default=8, ge=1, le=32)
 
-    rate_limit_per_minute: int = Field(default=10, ge=0)  # 0 disables the limiter
+    # Abuse protection. Limits are per client IP; 0 disables a limit.
+    rate_limit_per_minute: int = Field(default=10, ge=0)  # analyses per client per minute
+    ai_rate_limit_per_hour: int = Field(default=20, ge=0)  # AI summaries per client per hour
+    trust_proxy_headers: bool = False  # honor X-Forwarded-For (only behind a trusted proxy)
+    max_concurrent_analyses: int = Field(default=4, ge=1, le=64)
+    analysis_timeout_seconds: float = Field(default=110, gt=0, le=600)
+    max_request_bytes: int = Field(default=16_384, gt=0)
+    enable_docs: bool = True  # serve /docs and /openapi.json
 
     # In-process caches (0 disables). Results are reused only for identical requests.
     cache_max_entries: int = Field(default=64, ge=0)

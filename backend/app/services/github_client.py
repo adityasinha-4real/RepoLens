@@ -28,12 +28,31 @@ logger = logging.getLogger(__name__)
 API_VERSION = "2022-11-28"
 
 
+def allowed_hosts(settings: Settings) -> frozenset[str]:
+    hosts = {httpx.URL(settings.github_api_url).host, httpx.URL(settings.github_raw_url).host}
+    if settings.ai_base_url and (settings.ai_provider or "").lower().startswith("openai"):
+        hosts.add(httpx.URL(settings.ai_base_url).host)
+    elif (settings.ai_provider or "").lower().startswith("openai"):
+        hosts.add("api.openai.com")
+    return frozenset(h for h in hosts if h)
+
+
 def build_http_client(
     settings: Settings, transport: httpx.AsyncBaseTransport | None = None
 ) -> httpx.AsyncClient:
     """Shared connection pool. Redirects are followed so renamed repositories resolve;
     httpx drops the Authorization header on any cross-origin redirect."""
+    allowed = allowed_hosts(settings)
+
+    async def enforce_allowlist(request: httpx.Request) -> None:
+        # Defense in depth against SSRF: every outgoing request (including redirect hops)
+        # must target a configured upstream.
+        if request.url.host not in allowed:
+            logger.error("Blocked outgoing request to non-allowlisted host %s", request.url.host)
+            raise UpstreamError("Refused to contact an unexpected host.")
+
     return httpx.AsyncClient(
+        event_hooks={"request": [enforce_allowlist]},
         timeout=httpx.Timeout(settings.http_timeout_seconds, connect=10.0),
         follow_redirects=True,
         max_redirects=3,

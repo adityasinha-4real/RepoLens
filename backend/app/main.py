@@ -1,11 +1,14 @@
 """RepoLens API entry point."""
 
+import asyncio
 import logging
-from collections.abc import AsyncIterator
+import time
+import uuid
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
 import httpx
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -14,11 +17,20 @@ from fastapi.responses import JSONResponse
 from app.api.routes import router
 from app.core.config import APP_VERSION, Settings, get_settings
 from app.core.errors import AIUnavailableError, RepoLensError
+from app.core.rate_limit import SlidingWindowLimiter, client_id
 from app.services.ai.providers import build_provider
 from app.services.cache import TTLCache
 from app.services.github_client import build_http_client
 
 logger = logging.getLogger("repolens")
+access_log = logging.getLogger("repolens.access")
+
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+    "Cross-Origin-Resource-Policy": "same-site",
+}
 
 
 def error_body(code: str, message: str, details: dict | None = None) -> dict:
@@ -46,6 +58,10 @@ def create_app(
         app.state.http = build_http_client(settings, transport)
         app.state.report_cache = TTLCache(settings.cache_max_entries, settings.cache_ttl_seconds)
         app.state.ai_cache = TTLCache(settings.cache_max_entries, settings.ai_cache_ttl_seconds)
+        app.state.analysis_limiter = SlidingWindowLimiter(settings.rate_limit_per_minute, 60)
+        app.state.ai_limiter = SlidingWindowLimiter(settings.ai_rate_limit_per_hour, 3600)
+        app.state.analysis_slots = asyncio.Semaphore(settings.max_concurrent_analyses)
+        app.state.inflight = {}
         if ai_provider is not _UNSET:
             app.state.ai = ai_provider
         else:
@@ -57,6 +73,11 @@ def create_app(
                 app.state.ai = None
         if app.state.ai is not None:
             logger.info("AI summaries enabled (%s, %s)", app.state.ai.name, app.state.ai.model)
+        logger.info(
+            "RepoLens API %s started (GitHub token: %s)",
+            APP_VERSION,
+            "configured" if settings.github_token else "not configured",
+        )
         try:
             yield
         finally:
@@ -67,8 +88,40 @@ def create_app(
         version=APP_VERSION,
         description="Deterministic static analysis of public GitHub repositories.",
         lifespan=lifespan,
+        docs_url="/docs" if settings.enable_docs else None,
+        redoc_url=None,
+        openapi_url="/openapi.json" if settings.enable_docs else None,
     )
     app.dependency_overrides[get_settings] = lambda: settings
+
+    @app.middleware("http")
+    async def request_context(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        request_id = request.headers.get("x-request-id", "")[:64] or uuid.uuid4().hex[:16]
+        started = time.perf_counter()
+        length = request.headers.get("content-length")
+        if length and (not length.isdigit() or int(length) > settings.max_request_bytes):
+            response: Response = JSONResponse(
+                status_code=413,
+                content=error_body("request_too_large", "Request body is too large."),
+            )
+        else:
+            response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
+        for name, value in SECURITY_HEADERS.items():
+            response.headers.setdefault(name, value)
+        if request.url.path != "/api/health":
+            access_log.info(
+                "%s %s %s %.0fms client=%s id=%s",
+                request.method,
+                request.url.path,
+                response.status_code,
+                (time.perf_counter() - started) * 1000,
+                client_id(request, settings.trust_proxy_headers),
+                request_id,
+            )
+        return response
 
     # Reports for large repositories are several hundred KB of JSON; compress them.
     app.add_middleware(GZipMiddleware, minimum_size=2048)
@@ -76,7 +129,7 @@ def create_app(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_methods=["GET", "POST"],
-        allow_headers=["Content-Type"],
+        allow_headers=["Content-Type", "X-Request-ID"],
     )
 
     @app.exception_handler(RepoLensError)
