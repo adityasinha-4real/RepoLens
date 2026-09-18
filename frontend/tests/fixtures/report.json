@@ -1,0 +1,1865 @@
+{
+ "analysis": {
+  "analyzed_at": "2026-09-18T00:00:00+00:00",
+  "commit_sha": "abc123",
+  "duration_ms": 1234,
+  "engine_version": "0.1.0",
+  "fetch": {
+   "budget_exhausted": false,
+   "bytes_downloaded": 919,
+   "failed": 0,
+   "files_downloaded": 11,
+   "files_selected": 11,
+   "raw_rate_limited": false,
+   "skipped_binary": 0,
+   "skipped_too_large": 0
+  },
+  "github_api_calls": 4,
+  "head_commit_date": "2026-09-01T00:00:00Z",
+  "limits": {
+   "max_file_bytes": 400000,
+   "max_files_to_fetch": 300,
+   "max_total_fetch_bytes": 20000000,
+   "max_tree_entries": 50000
+  },
+  "notes": [],
+  "partial": false,
+  "rate_limit": {
+   "authenticated": false,
+   "limit": 60,
+   "remaining": 59,
+   "reset_at": "2030-03-17T17:46:40Z"
+  }
+ },
+ "architecture": {
+  "compose_services": [],
+  "edges": [
+   {
+    "imports": 1,
+    "source": "demo",
+    "target": "demo/api"
+   },
+   {
+    "imports": 1,
+    "source": "demo/api",
+    "target": "demo/services"
+   },
+   {
+    "imports": 1,
+    "source": "tests",
+    "target": "demo/services"
+   }
+  ],
+  "entry_points": [
+   {
+    "evidence": "pyproject.toml script 'demo'",
+    "kind": "CLI command",
+    "path": "demo.cli:main"
+   },
+   {
+    "evidence": "[\"demo\"]",
+    "kind": "Container command",
+    "path": "Dockerfile:CMD"
+   }
+  ],
+  "frameworks": [
+   {
+    "category": "backend",
+    "evidence": "pyproject.toml: 'fastapi'",
+    "name": "FastAPI"
+   }
+  ],
+  "hubs": [
+   {
+    "imported_by": 2,
+    "path": "demo/services/users.py"
+   },
+   {
+    "imported_by": 1,
+    "path": "demo/api/routes.py"
+   }
+  ],
+  "import_resolution": {
+   "external": 1,
+   "files_parsed": 4,
+   "imports_found": 4,
+   "internal_resolved": 3,
+   "languages": [
+    "Python"
+   ],
+   "unresolved": 0
+  },
+  "infrastructure": [
+   {
+    "detail": "Dockerfile",
+    "kind": "Container image",
+    "path": "Dockerfile"
+   }
+  ],
+  "methodology": "Frameworks are detected from declared dependencies and well-known configuration files. Each detection lists its evidence. Modules are workspace packages or the repository's major directories. Module roles are inferred from directory names. Edges between modules are drawn only for import statements that resolve unambiguously to files in this repository (Python, JavaScript/TypeScript, Go, Rust, Java/Kotlin), using the downloaded files. Ambiguous imports are counted as unresolved, never guessed.",
+  "modules": [
+   {
+    "bytes": 393,
+    "files": 6,
+    "id": ".",
+    "languages": [],
+    "name": "(root)",
+    "path": "",
+    "role": "Repository root",
+    "role_source": "unknown",
+    "sampled_files": 6,
+    "source_files": 0
+   },
+   {
+    "bytes": 97,
+    "files": 1,
+    "id": ".github",
+    "languages": [],
+    "name": ".github",
+    "path": ".github",
+    "role": "Infrastructure / CI",
+    "role_source": "directory-name",
+    "sampled_files": 1,
+    "source_files": 0
+   },
+   {
+    "bytes": 117,
+    "files": 2,
+    "id": "demo",
+    "languages": [
+     "Python"
+    ],
+    "name": "demo",
+    "path": "demo",
+    "role": "Documentation / examples",
+    "role_source": "directory-name",
+    "sampled_files": 1,
+    "source_files": 2
+   },
+   {
+    "bytes": 107,
+    "files": 2,
+    "id": "demo/api",
+    "languages": [
+     "Python"
+    ],
+    "name": "api",
+    "path": "demo/api",
+    "role": "API / routing",
+    "role_source": "directory-name",
+    "sampled_files": 1,
+    "source_files": 2
+   },
+   {
+    "bytes": 107,
+    "files": 2,
+    "id": "demo/services",
+    "languages": [
+     "Python"
+    ],
+    "name": "services",
+    "path": "demo/services",
+    "role": "Core / services",
+    "role_source": "directory-name",
+    "sampled_files": 1,
+    "source_files": 2
+   },
+   {
+    "bytes": 7,
+    "files": 1,
+    "id": "docs",
+    "languages": [],
+    "name": "docs",
+    "path": "docs",
+    "role": "Documentation / examples",
+    "role_source": "directory-name",
+    "sampled_files": 0,
+    "source_files": 0
+   },
+   {
+    "bytes": 98,
+    "files": 1,
+    "id": "tests",
+    "languages": [
+     "Python"
+    ],
+    "name": "tests",
+    "path": "tests",
+    "role": "Tests",
+    "role_source": "directory-name",
+    "sampled_files": 1,
+    "source_files": 1
+   }
+  ],
+  "monorepo_tool": null,
+  "notes": [],
+  "project_types": [
+   {
+    "category": "backend",
+    "evidence": "FastAPI",
+    "name": "Web / API service"
+   }
+  ],
+  "workspace_packages": []
+ },
+ "dependencies": {
+  "dependencies": [
+   {
+    "constraint": "range",
+    "direct": true,
+    "ecosystem": "PyPI",
+    "manifest": "pyproject.toml",
+    "name": "fastapi",
+    "scope": "production",
+    "source": "registry",
+    "version": ">=0.115"
+   },
+   {
+    "constraint": "exact",
+    "direct": true,
+    "ecosystem": "PyPI",
+    "manifest": "pyproject.toml",
+    "name": "httpx",
+    "scope": "production",
+    "source": "registry",
+    "version": "==0.27.0"
+   },
+   {
+    "constraint": "range",
+    "direct": true,
+    "ecosystem": "PyPI",
+    "manifest": "pyproject.toml",
+    "name": "pytest",
+    "scope": "development",
+    "source": "registry",
+    "version": ">=8"
+   }
+  ],
+  "dependencies_truncated": false,
+  "development": 1,
+  "ecosystems": [
+   {
+    "dependencies": 3,
+    "development": 1,
+    "ecosystem": "PyPI",
+    "has_lockfile": false,
+    "production": 2
+   }
+  ],
+  "external_sources": 0,
+  "lockfiles": [],
+  "manifests": [
+   {
+    "dependencies": 3,
+    "ecosystem": "PyPI",
+    "parse_error": null,
+    "path": "pyproject.toml"
+   }
+  ],
+  "manifests_not_analyzed": [],
+  "notes": [],
+  "other": 0,
+  "production": 2,
+  "total": 3,
+  "unconstrained": 0,
+  "unique_packages": 3,
+  "version_conflicts": [],
+  "vulnerability_data": "RepoLens has not checked these dependencies against a vulnerability database. Use a tool such as OSV-Scanner, npm audit or pip-audit for vulnerability data."
+ },
+ "documentation": {
+  "comment_density": 0.071,
+  "docs_directory": {
+   "doc_files": 1,
+   "files": 1,
+   "path": "docs",
+   "site_generator": null
+  },
+  "examples_directory": {
+   "doc_files": 0,
+   "files": 6,
+   "path": "demo",
+   "site_generator": null
+  },
+  "files": [
+   {
+    "key": "contributing",
+    "label": "Contributing guide",
+    "path": "CONTRIBUTING.md",
+    "present": true
+   },
+   {
+    "key": "license",
+    "label": "License file",
+    "path": "LICENSE",
+    "present": true
+   },
+   {
+    "key": "changelog",
+    "label": "Changelog",
+    "path": null,
+    "present": false
+   },
+   {
+    "key": "code_of_conduct",
+    "label": "Code of conduct",
+    "path": null,
+    "present": false
+   },
+   {
+    "key": "security",
+    "label": "Security policy",
+    "path": null,
+    "present": false
+   },
+   {
+    "key": "support",
+    "label": "Support guide",
+    "path": null,
+    "present": false
+   },
+   {
+    "key": "citation",
+    "label": "Citation file",
+    "path": null,
+    "present": false
+   },
+   {
+    "key": "authors",
+    "label": "Authors / maintainers",
+    "path": null,
+    "present": false
+   },
+   {
+    "key": "issue_templates",
+    "label": "Issue templates",
+    "path": null,
+    "present": false
+   },
+   {
+    "key": "pr_template",
+    "label": "Pull request template",
+    "path": null,
+    "present": false
+   }
+  ],
+  "license_file": "LICENSE",
+  "license_name": "MIT License",
+  "license_spdx": "MIT",
+  "notes": [],
+  "python_docstrings": {
+   "documented": 1,
+   "files_analyzed": 3,
+   "percent": 33.3,
+   "public_definitions": 3
+  },
+  "readme": {
+   "badges": 0,
+   "broken_relative_links": [],
+   "bytes": 122,
+   "code_blocks": 1,
+   "format": "markdown",
+   "has_table_of_contents": false,
+   "headings": [
+    "Demo",
+    "Installation",
+    "Usage"
+   ],
+   "images": 0,
+   "lines": 16,
+   "links": 1,
+   "path": "README.md",
+   "reading_minutes": 0.1,
+   "sections": [
+    {
+     "key": "install",
+     "label": "Installation / setup",
+     "path": null,
+     "present": true
+    },
+    {
+     "key": "usage",
+     "label": "Usage / examples",
+     "path": null,
+     "present": true
+    },
+    {
+     "key": "configuration",
+     "label": "Configuration",
+     "path": null,
+     "present": false
+    },
+    {
+     "key": "features",
+     "label": "Features / overview",
+     "path": null,
+     "present": false
+    },
+    {
+     "key": "requirements",
+     "label": "Requirements",
+     "path": null,
+     "present": false
+    },
+    {
+     "key": "testing",
+     "label": "Testing",
+     "path": null,
+     "present": false
+    },
+    {
+     "key": "api",
+     "label": "API / reference",
+     "path": null,
+     "present": false
+    },
+    {
+     "key": "deployment",
+     "label": "Deployment",
+     "path": null,
+     "present": false
+    },
+    {
+     "key": "contributing",
+     "label": "Contributing",
+     "path": null,
+     "present": false
+    },
+    {
+     "key": "license",
+     "label": "License",
+     "path": null,
+     "present": false
+    },
+    {
+     "key": "support",
+     "label": "Support / FAQ",
+     "path": null,
+     "present": false
+    }
+   ],
+   "words": 13
+  }
+ },
+ "health": {
+  "dimensions": [
+   {
+    "applicable": true,
+    "checks": [
+     {
+      "detail": "README.md",
+      "id": "documentation.readme",
+      "label": "README present",
+      "max_points": 20.0,
+      "passed": true,
+      "points": 20.0
+     },
+     {
+      "detail": "13 words",
+      "id": "documentation.readme_depth",
+      "label": "README has at least 300 words",
+      "max_points": 10.0,
+      "passed": false,
+      "points": 0.4
+     },
+     {
+      "detail": "Installation section found.",
+      "id": "documentation.install",
+      "label": "README explains installation/setup",
+      "max_points": 10.0,
+      "passed": true,
+      "points": 10.0
+     },
+     {
+      "detail": "Usage section found.",
+      "id": "documentation.usage",
+      "label": "README explains usage",
+      "max_points": 10.0,
+      "passed": true,
+      "points": 10.0
+     },
+     {
+      "detail": "MIT",
+      "id": "documentation.license",
+      "label": "License declared",
+      "max_points": 20.0,
+      "passed": true,
+      "points": 20.0
+     },
+     {
+      "detail": "CONTRIBUTING.md",
+      "id": "documentation.contributing",
+      "label": "Contributing guide",
+      "max_points": 10.0,
+      "passed": true,
+      "points": 10.0
+     },
+     {
+      "detail": "docs/ with 1 doc files",
+      "id": "documentation.docs",
+      "label": "Dedicated documentation",
+      "max_points": 10.0,
+      "passed": true,
+      "points": 10.0
+     },
+     {
+      "detail": "No changelog file.",
+      "id": "documentation.changelog",
+      "label": "Changelog",
+      "max_points": 10.0,
+      "passed": false,
+      "points": 0.0
+     }
+    ],
+    "key": "documentation",
+    "label": "Documentation",
+    "score": 80,
+    "summary": "Documentation coverage is strong."
+   },
+   {
+    "applicable": true,
+    "checks": [
+     {
+      "detail": "0 of 6 files (0%)",
+      "id": "organization.long_files",
+      "label": "5% or fewer source files exceed 500 lines",
+      "max_points": 25.0,
+      "passed": true,
+      "points": 25.0
+     },
+     {
+      "detail": "0 hotspots across 3 downloaded source files",
+      "id": "organization.complexity",
+      "label": "Few high-complexity hotspots in downloaded files",
+      "max_points": 25.0,
+      "passed": true,
+      "points": 25.0
+     },
+     {
+      "detail": "Ruff",
+      "id": "organization.linter",
+      "label": "Linter configured",
+      "max_points": 25.0,
+      "passed": true,
+      "points": 25.0
+     },
+     {
+      "detail": "No formatter configuration detected.",
+      "id": "organization.formatter",
+      "label": "Formatter or EditorConfig configured",
+      "max_points": 15.0,
+      "passed": false,
+      "points": 0.0
+     },
+     {
+      "detail": "1 markers in 3 files",
+      "id": "organization.markers",
+      "label": "Low TODO/FIXME density (5 or fewer per downloaded file)",
+      "max_points": 10.0,
+      "passed": true,
+      "points": 10.0
+     }
+    ],
+    "key": "organization",
+    "label": "Code organization",
+    "score": 85,
+    "summary": "Code organization indicators are strong."
+   },
+   {
+    "applicable": true,
+    "checks": [
+     {
+      "detail": "1 test files",
+      "id": "tests.tests_exist",
+      "label": "Test files present",
+      "max_points": 40.0,
+      "passed": true,
+      "points": 40.0
+     },
+     {
+      "detail": "ratio 0.17",
+      "id": "tests.ratio",
+      "label": "Test-to-source file ratio of at least 0.2",
+      "max_points": 20.0,
+      "passed": false,
+      "points": 16.7
+     },
+     {
+      "detail": "pytest",
+      "id": "tests.framework",
+      "label": "Test framework configured",
+      "max_points": 20.0,
+      "passed": true,
+      "points": 20.0
+     },
+     {
+      "detail": "GitHub Actions",
+      "id": "tests.ci",
+      "label": "Continuous integration configured",
+      "max_points": 20.0,
+      "passed": true,
+      "points": 20.0
+     }
+    ],
+    "key": "tests",
+    "label": "Test presence",
+    "score": 97,
+    "summary": "Test presence is strong. This measures whether tests exist, not whether they pass or what they cover."
+   },
+   {
+    "applicable": true,
+    "checks": [
+     {
+      "detail": "1 manifest(s) parsed",
+      "id": "dependencies.parseable",
+      "label": "Manifests parse cleanly",
+      "max_points": 20.0,
+      "passed": true,
+      "points": 20.0
+     },
+     {
+      "detail": "Locked: none; ecosystems: PyPI",
+      "id": "dependencies.lockfiles",
+      "label": "Lockfile for each ecosystem",
+      "max_points": 30.0,
+      "passed": false,
+      "points": 0.0
+     },
+     {
+      "detail": "0 of 3 unconstrained",
+      "id": "dependencies.constraints",
+      "label": "10% or fewer dependencies without a version constraint",
+      "max_points": 20.0,
+      "passed": true,
+      "points": 20.0
+     },
+     {
+      "detail": "0 package(s) declared with different versions",
+      "id": "dependencies.conflicts",
+      "label": "No conflicting version declarations",
+      "max_points": 15.0,
+      "passed": true,
+      "points": 15.0
+     },
+     {
+      "detail": "No Dependabot or Renovate configuration.",
+      "id": "dependencies.updates",
+      "label": "Automated dependency updates",
+      "max_points": 15.0,
+      "passed": false,
+      "points": 0.0
+     }
+    ],
+    "key": "dependencies",
+    "label": "Dependency hygiene",
+    "score": 55,
+    "summary": "Dependency hygiene is moderate. No vulnerability database was consulted."
+   },
+   {
+    "applicable": true,
+    "checks": [
+     {
+      "detail": "last push 17 days ago",
+      "id": "activity.recent_push",
+      "label": "Pushed within the last 30 days (partial credit up to a year)",
+      "max_points": 50.0,
+      "passed": true,
+      "points": 50.0
+     },
+     {
+      "detail": "Active (not archived)",
+      "id": "activity.not_archived",
+      "label": "Repository is not archived",
+      "max_points": 30.0,
+      "passed": true,
+      "points": 30.0
+     },
+     {
+      "detail": "last commit 17 days ago",
+      "id": "activity.recent_commit",
+      "label": "Default branch committed to within 180 days",
+      "max_points": 20.0,
+      "passed": true,
+      "points": 20.0
+     }
+    ],
+    "key": "activity",
+    "label": "Repository activity",
+    "score": 100,
+    "summary": "Activity is strong, based on the last push and last commit dates only."
+   },
+   {
+    "applicable": true,
+    "checks": [
+     {
+      "detail": "0 high-severity indicator(s)",
+      "id": "security.no_high",
+      "label": "No high-severity indicators (outside tests)",
+      "max_points": 35.0,
+      "passed": true,
+      "points": 35.0
+     },
+     {
+      "detail": "0 medium-severity indicator(s)",
+      "id": "security.few_medium",
+      "label": "3 or fewer medium-severity indicators (outside tests)",
+      "max_points": 20.0,
+      "passed": true,
+      "points": 20.0
+     },
+     {
+      "detail": "None detected",
+      "id": "security.no_sensitive_files",
+      "label": "No committed sensitive files",
+      "max_points": 15.0,
+      "passed": true,
+      "points": 15.0
+     },
+     {
+      "detail": "No SECURITY.md found.",
+      "id": "security.policy",
+      "label": "Security policy published",
+      "max_points": 15.0,
+      "passed": false,
+      "points": 0.0
+     },
+     {
+      "detail": "A .env pattern is present.",
+      "id": "security.gitignore",
+      "label": ".gitignore protects local secrets",
+      "max_points": 15.0,
+      "passed": true,
+      "points": 15.0
+     }
+    ],
+    "key": "security",
+    "label": "Security indicators",
+    "score": 85,
+    "summary": "Static security indicators are strong. This is not a security assessment, and the repository is not verified as secure."
+   },
+   {
+    "applicable": true,
+    "checks": [
+     {
+      "detail": "Committed: node_modules",
+      "id": "structure.no_artifacts",
+      "label": "No committed dependency/build directories",
+      "max_points": 25.0,
+      "passed": false,
+      "points": 0.0
+     },
+     {
+      "detail": "0 of 6 source files at the repository root",
+      "id": "structure.source_layout",
+      "label": "Source organized into directories",
+      "max_points": 25.0,
+      "passed": true,
+      "points": 25.0
+     },
+     {
+      "detail": "Test files or directories found",
+      "id": "structure.tests_separated",
+      "label": "Tests are identifiable",
+      "max_points": 20.0,
+      "passed": true,
+      "points": 20.0
+     },
+     {
+      "detail": "max depth 3",
+      "id": "structure.depth",
+      "label": "Directory depth of 10 or less (outside tests and examples)",
+      "max_points": 10.0,
+      "passed": true,
+      "points": 10.0
+     },
+     {
+      "detail": "Present",
+      "id": "structure.gitignore",
+      "label": "Root .gitignore present",
+      "max_points": 10.0,
+      "passed": true,
+      "points": 10.0
+     },
+     {
+      "detail": "demo.cli:main",
+      "id": "structure.entry_point",
+      "label": "Entry point identifiable",
+      "max_points": 10.0,
+      "passed": true,
+      "points": 10.0
+     }
+    ],
+    "key": "structure",
+    "label": "Project structure",
+    "score": 75,
+    "summary": "Project structure indicators are moderate."
+   }
+  ],
+  "methodology": "Each dimension is a fixed list of checks worth a set number of points. Its score is earned / possible points x 100. The overall indicator is the unweighted mean of the applicable dimensions. It is a summary of these specific, measurable checks, not a judgement of code correctness, security or quality. Content-based checks depend on the downloaded file sample. See each check for its evidence.",
+  "overall": 82
+ },
+ "languages": {
+  "counted_lines": 62,
+  "estimated_lines": 1,
+  "extensions": [
+   {
+    "bytes": 429,
+    "extension": ".py",
+    "files": 7
+   },
+   {
+    "bytes": 63,
+    "extension": "(none)",
+    "files": 3
+   },
+   {
+    "bytes": 139,
+    "extension": ".md",
+    "files": 3
+   },
+   {
+    "bytes": 198,
+    "extension": ".toml",
+    "files": 1
+   },
+   {
+    "bytes": 97,
+    "extension": ".yml",
+    "files": 1
+   }
+  ],
+  "github_breakdown": [
+   {
+    "bytes": 900,
+    "language": "Python",
+    "percent": 95.74
+   },
+   {
+    "bytes": 40,
+    "language": "Dockerfile",
+    "percent": 4.26
+   }
+  ],
+  "languages": [
+   {
+    "blank_lines": 11,
+    "bytes": 429,
+    "code_lines": 16,
+    "comment_lines": 1,
+    "files": 7,
+    "kind": "programming",
+    "language": "Python",
+    "lines": 28,
+    "lines_estimated": false,
+    "percent_of_bytes": 47.83,
+    "sampled_files": 4
+   },
+   {
+    "blank_lines": 0,
+    "bytes": 198,
+    "code_lines": 9,
+    "comment_lines": 0,
+    "files": 1,
+    "kind": "data",
+    "language": "TOML",
+    "lines": 9,
+    "lines_estimated": false,
+    "percent_of_bytes": 22.07,
+    "sampled_files": 1
+   },
+   {
+    "blank_lines": 6,
+    "bytes": 139,
+    "code_lines": 10,
+    "comment_lines": 0,
+    "files": 3,
+    "kind": "prose",
+    "language": "Markdown",
+    "lines": 17,
+    "lines_estimated": true,
+    "percent_of_bytes": 15.5,
+    "sampled_files": 2
+   },
+   {
+    "blank_lines": 0,
+    "bytes": 97,
+    "code_lines": 6,
+    "comment_lines": 0,
+    "files": 1,
+    "kind": "data",
+    "language": "YAML",
+    "lines": 6,
+    "lines_estimated": false,
+    "percent_of_bytes": 10.81,
+    "sampled_files": 1
+   },
+   {
+    "blank_lines": 0,
+    "bytes": 34,
+    "code_lines": 3,
+    "comment_lines": 0,
+    "files": 1,
+    "kind": "programming",
+    "language": "Dockerfile",
+    "lines": 3,
+    "lines_estimated": false,
+    "percent_of_bytes": 3.79,
+    "sampled_files": 1
+   }
+  ],
+  "methodology": "Languages are detected from file extensions and well-known filenames, excluding ignored directories, lockfiles, generated files and binaries. Line counts are exact for downloaded files. For the remaining files they are estimated from file size using the average bytes-per-line measured for the same language. The GitHub breakdown comes straight from GitHub's linguist-based API and can differ from RepoLens's counts.",
+  "primary_language": "Python",
+  "sampled_files": 9,
+  "total_lines": 63
+ },
+ "quality": {
+  "average_lines_per_sampled_file": 8.7,
+  "average_source_file_bytes": 55,
+  "commented_code_files": [],
+  "commented_code_lines": 0,
+  "complexity_hotspots": [],
+  "complexity_threshold": 10,
+  "coverage_note": "Content-based metrics (markers, commented-out code, complexity) cover 3 of 6 source files that were downloaded.",
+  "high_complexity_count": 0,
+  "largest_source_files": [
+   {
+    "estimated": false,
+    "lines": 10,
+    "path": "demo/cli.py"
+   },
+   {
+    "estimated": false,
+    "lines": 7,
+    "path": "demo/api/routes.py"
+   },
+   {
+    "estimated": false,
+    "lines": 9,
+    "path": "demo/services/users.py"
+   },
+   {
+    "estimated": true,
+    "lines": 0,
+    "path": "demo/__init__.py"
+   },
+   {
+    "estimated": true,
+    "lines": 0,
+    "path": "demo/api/__init__.py"
+   },
+   {
+    "estimated": true,
+    "lines": 0,
+    "path": "demo/services/__init__.py"
+   }
+  ],
+  "long_file_count": 0,
+  "long_file_threshold": 500,
+  "long_files": [],
+  "marker_counts": {
+   "FIXME": 0,
+   "HACK": 0,
+   "TODO": 1,
+   "XXX": 0
+  },
+  "markers": [
+   {
+    "line": 5,
+    "path": "demo/api/routes.py",
+    "tag": "TODO",
+    "text": "TODO: paginate"
+   }
+  ],
+  "markers_truncated": false,
+  "methodology": "Python functions are measured with McCabe cyclomatic complexity computed from the abstract syntax tree (the code is parsed, never executed); functions above 10 are flagged. For other brace-based languages RepoLens uses a file-level heuristic: decision keywords/operators and maximum brace nesting, flagged at 100+ decision points or nesting 6+. Long files have more than 500 lines (estimated from size at 40 bytes/line when not downloaded). Commented-out code is detected heuristically as runs of 2+ consecutive comment lines that look like code.",
+  "python_functions_analyzed": 4,
+  "sampled_source_files": 3,
+  "source_bytes": 331,
+  "source_files": 6,
+  "test_files": 1,
+  "test_to_source_ratio": 0.167,
+  "tooling": {
+   "ci": [
+    "GitHub Actions"
+   ],
+   "editorconfig": false,
+   "formatters": [],
+   "linters": [
+    "Ruff"
+   ],
+   "pre_commit": false,
+   "test_frameworks": [
+    "pytest"
+   ],
+   "type_checkers": []
+  }
+ },
+ "repository": {
+  "archived": false,
+  "created_at": "2020-01-01T00:00:00Z",
+  "default_branch": "main",
+  "description": "A demo repository",
+  "disabled": false,
+  "forks": 7,
+  "full_name": "octo/demo",
+  "homepage": null,
+  "html_url": "https://github.com/octo/demo",
+  "is_fork": false,
+  "is_template": false,
+  "license_name": "MIT License",
+  "license_spdx": "MIT",
+  "name": "demo",
+  "open_issues": 5,
+  "owner": "octo",
+  "owner_avatar_url": "https://x/avatar.png",
+  "owner_type": "Organization",
+  "primary_language": "Python",
+  "pushed_at": "2026-09-01T00:00:00Z",
+  "size_kb": 120,
+  "stars": 42,
+  "topics": [
+   "demo"
+  ],
+  "updated_at": "2026-09-01T00:00:00Z",
+  "watchers": 3
+ },
+ "schema_version": "1.0",
+ "security": {
+  "counts_by_category": {
+   "supply-chain": 1
+  },
+  "counts_by_severity": {
+   "high": 0,
+   "info": 0,
+   "low": 1,
+   "medium": 0
+  },
+  "coverage_note": "Content checks ran on 11 downloaded files; path-based checks ran on all 15 files.",
+  "disclaimer": "These are potential security concerns detected by static pattern matching on a sample of files. They are indicators, not confirmed vulnerabilities, and may include false positives. The absence of findings does not mean the repository is secure.",
+  "env_variable_files": 1,
+  "env_variables": [
+   "DATABASE_URL"
+  ],
+  "files_scanned": 11,
+  "findings": [
+   {
+    "category": "supply-chain",
+    "confidence": "high",
+    "description": "FROM without a version tag or digest (or with :latest) makes builds non-reproducible and can pull unexpected changes.",
+    "evidence": "FROM python",
+    "in_test": false,
+    "line": 1,
+    "path": "Dockerfile",
+    "rule": "docker.unpinned-base-image",
+    "severity": "low",
+    "title": "Container base image without a pinned version"
+   }
+  ],
+  "findings_truncated": false,
+  "hygiene": [
+   {
+    "detail": "Root .gitignore found.",
+    "key": "gitignore",
+    "label": ".gitignore present",
+    "passed": true
+   },
+   {
+    "detail": "A .env pattern is present.",
+    "key": "gitignore_env",
+    "label": ".gitignore excludes .env files",
+    "passed": true
+   },
+   {
+    "detail": "No SECURITY.md found.",
+    "key": "security_policy",
+    "label": "Security policy",
+    "passed": false
+   },
+   {
+    "detail": "No Dependabot or Renovate configuration.",
+    "key": "dependency_updates",
+    "label": "Automated dependency updates",
+    "passed": false
+   },
+   {
+    "detail": "No lockfile found.",
+    "key": "lockfiles",
+    "label": "Dependency lockfile",
+    "passed": false
+   },
+   {
+    "detail": "No CODEOWNERS file.",
+    "key": "codeowners",
+    "label": "CODEOWNERS",
+    "passed": false
+   }
+  ],
+  "rules": [
+   {
+    "category": "secret",
+    "description": "A PEM private key block is committed.",
+    "id": "secret.private-key",
+    "severity": "high",
+    "title": "Private key material"
+   },
+   {
+    "category": "secret",
+    "description": "Matches the AWS access key ID format.",
+    "id": "secret.aws-access-key",
+    "severity": "high",
+    "title": "Possible AWS access key ID"
+   },
+   {
+    "category": "secret",
+    "description": "Matches the GitHub personal access / app token format.",
+    "id": "secret.github-token",
+    "severity": "high",
+    "title": "Possible GitHub token"
+   },
+   {
+    "category": "secret",
+    "description": "Matches the Slack token format.",
+    "id": "secret.slack-token",
+    "severity": "high",
+    "title": "Possible Slack token"
+   },
+   {
+    "category": "secret",
+    "description": "Matches the Stripe live secret/restricted key format.",
+    "id": "secret.stripe-live-key",
+    "severity": "high",
+    "title": "Possible Stripe live secret key"
+   },
+   {
+    "category": "secret",
+    "description": "Matches the Google API key format. Some Google keys are meant to be public; verify its restrictions.",
+    "id": "secret.google-api-key",
+    "severity": "medium",
+    "title": "Possible Google API key"
+   },
+   {
+    "category": "secret",
+    "description": "Matches an OpenAI or Anthropic API key format.",
+    "id": "secret.llm-api-key",
+    "severity": "high",
+    "title": "Possible AI provider API key"
+   },
+   {
+    "category": "secret",
+    "description": "Matches the npm access token format.",
+    "id": "secret.npm-token",
+    "severity": "high",
+    "title": "Possible npm access token"
+   },
+   {
+    "category": "secret",
+    "description": "Matches the SendGrid API key format.",
+    "id": "secret.sendgrid-key",
+    "severity": "high",
+    "title": "Possible SendGrid API key"
+   },
+   {
+    "category": "secret",
+    "description": "A database or broker URL contains an inline username and password.",
+    "id": "secret.connection-string",
+    "severity": "medium",
+    "title": "Credentials in a connection string"
+   },
+   {
+    "category": "dangerous-code",
+    "description": "eval()/exec() on untrusted input can lead to code execution.",
+    "id": "code.python-eval",
+    "severity": "medium",
+    "title": "Dynamic code execution (eval/exec)"
+   },
+   {
+    "category": "dangerous-code",
+    "description": "shell=True with interpolated input can allow command injection.",
+    "id": "code.python-shell-true",
+    "severity": "medium",
+    "title": "Subprocess with shell=True"
+   },
+   {
+    "category": "dangerous-code",
+    "description": "os.system runs a shell command; prefer subprocess with an argument list.",
+    "id": "code.python-os-system",
+    "severity": "low",
+    "title": "os.system call"
+   },
+   {
+    "category": "dangerous-code",
+    "description": "Unpickling untrusted data can execute arbitrary code.",
+    "id": "code.python-pickle",
+    "severity": "medium",
+    "title": "Unpickling data"
+   },
+   {
+    "category": "dangerous-code",
+    "description": "yaml.load with the default/unsafe loader can construct arbitrary objects.",
+    "id": "code.python-yaml-load",
+    "severity": "medium",
+    "title": "yaml.load without SafeLoader"
+   },
+   {
+    "category": "insecure-transport",
+    "description": "Disabling certificate verification allows man-in-the-middle attacks.",
+    "id": "code.tls-verify-disabled",
+    "severity": "medium",
+    "title": "TLS certificate verification disabled"
+   },
+   {
+    "category": "dangerous-code",
+    "description": "eval()/new Function() on untrusted input can lead to code execution.",
+    "id": "code.js-eval",
+    "severity": "medium",
+    "title": "Dynamic code execution (eval/new Function)"
+   },
+   {
+    "category": "dangerous-code",
+    "description": "Assigning untrusted data to innerHTML / dangerouslySetInnerHTML can cause XSS.",
+    "id": "code.js-inner-html",
+    "severity": "low",
+    "title": "Raw HTML injection sink"
+   },
+   {
+    "category": "dangerous-code",
+    "description": "child_process exec runs a shell; prefer execFile/spawn with argument arrays.",
+    "id": "code.js-child-process",
+    "severity": "low",
+    "title": "Shell command execution"
+   },
+   {
+    "category": "dangerous-code",
+    "description": "eval/unserialize/shell execution functions are dangerous with untrusted input.",
+    "id": "code.php-dangerous",
+    "severity": "medium",
+    "title": "Dangerous PHP function"
+   },
+   {
+    "category": "configuration",
+    "description": "Allowing any origin can expose authenticated endpoints to other sites.",
+    "id": "code.cors-wildcard",
+    "severity": "low",
+    "title": "Wildcard CORS policy"
+   },
+   {
+    "category": "configuration",
+    "description": "Debug mode in a committed settings file can leak internals if deployed.",
+    "id": "config.debug-enabled",
+    "severity": "low",
+    "title": "Debug mode enabled in settings"
+   },
+   {
+    "category": "supply-chain",
+    "description": "Piping a downloaded script into a shell runs unverified code at build time.",
+    "id": "docker.curl-pipe-shell",
+    "severity": "medium",
+    "title": "Remote script piped to a shell"
+   },
+   {
+    "category": "ci",
+    "description": "pull_request_target runs with write permissions and secrets; combined with a checkout of the PR head it can let forks run code with privileges.",
+    "id": "ci.pull-request-target",
+    "severity": "medium",
+    "title": "pull_request_target workflow trigger"
+   },
+   {
+    "category": "ci",
+    "description": "Expressions like github.event.*.title/body inside run: steps allow script injection by anyone who can open an issue or PR.",
+    "id": "ci.script-injection",
+    "severity": "medium",
+    "title": "Untrusted input interpolated into a workflow script"
+   },
+   {
+    "category": "ci",
+    "description": "Actions referenced by tag or branch can change under you; pinning to a full commit SHA is the hardened practice.",
+    "id": "ci.unpinned-action",
+    "severity": "info",
+    "title": "Third-party action not pinned to a commit SHA"
+   },
+   {
+    "category": "ci",
+    "description": "write-all gives the workflow token broad repository access.",
+    "id": "ci.write-all-permissions",
+    "severity": "medium",
+    "title": "Workflow grants write-all permissions"
+   },
+   {
+    "category": "secret",
+    "description": "Credential-like names assigned high-entropy string literals (placeholders filtered).",
+    "id": "secret.generic-assignment",
+    "severity": "medium",
+    "title": "Possible hardcoded credential"
+   },
+   {
+    "category": "insecure-transport",
+    "description": "http:// URLs in source/config, excluding local, private and XML-namespace hosts.",
+    "id": "transport.insecure-http",
+    "severity": "low",
+    "title": "Insecure HTTP URL"
+   },
+   {
+    "category": "sensitive-file",
+    "description": "Committed .env files, private keys, credential stores, Terraform state and database files.",
+    "id": "file.sensitive",
+    "severity": "high",
+    "title": "Sensitive file committed"
+   },
+   {
+    "category": "env-exposure",
+    "description": "Public-prefixed env vars (NEXT_PUBLIC_, VITE_, ...) whose names suggest secrets.",
+    "id": "env.client-exposed-secret",
+    "severity": "medium",
+    "title": "Secret-like variable exposed to the client bundle"
+   },
+   {
+    "category": "supply-chain",
+    "description": "Dockerfile FROM lines without a tag/digest or using :latest (multi-stage aliases and build args excluded).",
+    "id": "docker.unpinned-base-image",
+    "severity": "low",
+    "title": "Container base image without a pinned version"
+   },
+   {
+    "category": "gitignore",
+    "description": "Env vars are used but .gitignore has no .env pattern.",
+    "id": "gitignore.env-not-excluded",
+    "severity": "low",
+    "title": ".env not excluded by .gitignore"
+   }
+  ]
+ },
+ "structure": {
+  "analyzed_files": 15,
+  "analyzed_size_bytes": 926,
+  "categories": [
+   {
+    "bytes": 331,
+    "category": "source",
+    "files": 6
+   },
+   {
+    "bytes": 347,
+    "category": "config",
+    "files": 4
+   },
+   {
+    "bytes": 150,
+    "category": "documentation",
+    "files": 4
+   },
+   {
+    "bytes": 98,
+    "category": "test",
+    "files": 1
+   }
+  ],
+  "ignored_directories": [
+   {
+    "bytes": 19,
+    "files": 1,
+    "path": "node_modules"
+   }
+  ],
+  "ignored_files": 1,
+  "ignored_size_bytes": 19,
+  "largest_directories": [
+   {
+    "bytes": 331,
+    "files": 6,
+    "path": "demo"
+   },
+   {
+    "bytes": 107,
+    "files": 2,
+    "path": "demo/api"
+   },
+   {
+    "bytes": 107,
+    "files": 2,
+    "path": "demo/services"
+   },
+   {
+    "bytes": 98,
+    "files": 1,
+    "path": "tests"
+   },
+   {
+    "bytes": 97,
+    "files": 1,
+    "path": ".github"
+   },
+   {
+    "bytes": 97,
+    "files": 1,
+    "path": ".github/workflows"
+   },
+   {
+    "bytes": 7,
+    "files": 1,
+    "path": "docs"
+   }
+  ],
+  "largest_files": [
+   {
+    "category": "config",
+    "language": "TOML",
+    "path": "pyproject.toml",
+    "size": 198
+   },
+   {
+    "category": "documentation",
+    "language": "Markdown",
+    "path": "README.md",
+    "size": 122
+   },
+   {
+    "category": "source",
+    "language": "Python",
+    "path": "demo/cli.py",
+    "size": 117
+   },
+   {
+    "category": "source",
+    "language": "Python",
+    "path": "demo/api/routes.py",
+    "size": 107
+   },
+   {
+    "category": "source",
+    "language": "Python",
+    "path": "demo/services/users.py",
+    "size": 107
+   },
+   {
+    "category": "test",
+    "language": "Python",
+    "path": "tests/test_users.py",
+    "size": 98
+   },
+   {
+    "category": "config",
+    "language": "YAML",
+    "path": ".github/workflows/ci.yml",
+    "size": 97
+   },
+   {
+    "category": "config",
+    "language": "Dockerfile",
+    "path": "Dockerfile",
+    "size": 34
+   },
+   {
+    "category": "config",
+    "language": null,
+    "path": ".gitignore",
+    "size": 18
+   },
+   {
+    "category": "documentation",
+    "language": null,
+    "path": "LICENSE",
+    "size": 11
+   },
+   {
+    "category": "documentation",
+    "language": "Markdown",
+    "path": "CONTRIBUTING.md",
+    "size": 10
+   },
+   {
+    "category": "documentation",
+    "language": "Markdown",
+    "path": "docs/index.md",
+    "size": 7
+   },
+   {
+    "category": "source",
+    "language": "Python",
+    "path": "demo/__init__.py",
+    "size": 0
+   },
+   {
+    "category": "source",
+    "language": "Python",
+    "path": "demo/api/__init__.py",
+    "size": 0
+   },
+   {
+    "category": "source",
+    "language": "Python",
+    "path": "demo/services/__init__.py",
+    "size": 0
+   }
+  ],
+  "max_depth": 3,
+  "notes": [],
+  "oversized_files": 0,
+  "product_max_depth": 3,
+  "submodules": [],
+  "symlinks": 0,
+  "top_level": [
+   {
+    "children": null,
+    "files": 1,
+    "ignored": false,
+    "name": ".github",
+    "omitted_children": 0,
+    "path": ".github",
+    "size": 97,
+    "type": "dir"
+   },
+   {
+    "children": null,
+    "files": 6,
+    "ignored": false,
+    "name": "demo",
+    "omitted_children": 0,
+    "path": "demo",
+    "size": 331,
+    "type": "dir"
+   },
+   {
+    "children": null,
+    "files": 1,
+    "ignored": false,
+    "name": "docs",
+    "omitted_children": 0,
+    "path": "docs",
+    "size": 7,
+    "type": "dir"
+   },
+   {
+    "children": null,
+    "files": 1,
+    "ignored": true,
+    "name": "node_modules",
+    "omitted_children": 0,
+    "path": "node_modules",
+    "size": 19,
+    "type": "dir"
+   },
+   {
+    "children": null,
+    "files": 1,
+    "ignored": false,
+    "name": "tests",
+    "omitted_children": 0,
+    "path": "tests",
+    "size": 98,
+    "type": "dir"
+   },
+   {
+    "children": null,
+    "files": 0,
+    "ignored": false,
+    "name": ".gitignore",
+    "omitted_children": 0,
+    "path": ".gitignore",
+    "size": 18,
+    "type": "file"
+   },
+   {
+    "children": null,
+    "files": 0,
+    "ignored": false,
+    "name": "CONTRIBUTING.md",
+    "omitted_children": 0,
+    "path": "CONTRIBUTING.md",
+    "size": 10,
+    "type": "file"
+   },
+   {
+    "children": null,
+    "files": 0,
+    "ignored": false,
+    "name": "Dockerfile",
+    "omitted_children": 0,
+    "path": "Dockerfile",
+    "size": 34,
+    "type": "file"
+   },
+   {
+    "children": null,
+    "files": 0,
+    "ignored": false,
+    "name": "LICENSE",
+    "omitted_children": 0,
+    "path": "LICENSE",
+    "size": 11,
+    "type": "file"
+   },
+   {
+    "children": null,
+    "files": 0,
+    "ignored": false,
+    "name": "pyproject.toml",
+    "omitted_children": 0,
+    "path": "pyproject.toml",
+    "size": 198,
+    "type": "file"
+   },
+   {
+    "children": null,
+    "files": 0,
+    "ignored": false,
+    "name": "README.md",
+    "omitted_children": 0,
+    "path": "README.md",
+    "size": 122,
+    "type": "file"
+   }
+  ],
+  "total_directories": 7,
+  "total_files": 16,
+  "total_size_bytes": 945,
+  "tree": {
+   "children": [
+    {
+     "children": [
+      {
+       "children": [
+        {
+         "children": null,
+         "files": 0,
+         "ignored": false,
+         "name": "ci.yml",
+         "omitted_children": 0,
+         "path": ".github/workflows/ci.yml",
+         "size": 97,
+         "type": "file"
+        }
+       ],
+       "files": 1,
+       "ignored": false,
+       "name": "workflows",
+       "omitted_children": 0,
+       "path": ".github/workflows",
+       "size": 97,
+       "type": "dir"
+      }
+     ],
+     "files": 1,
+     "ignored": false,
+     "name": ".github",
+     "omitted_children": 0,
+     "path": ".github",
+     "size": 97,
+     "type": "dir"
+    },
+    {
+     "children": [
+      {
+       "children": [
+        {
+         "children": null,
+         "files": 0,
+         "ignored": false,
+         "name": "__init__.py",
+         "omitted_children": 0,
+         "path": "demo/api/__init__.py",
+         "size": 0,
+         "type": "file"
+        },
+        {
+         "children": null,
+         "files": 0,
+         "ignored": false,
+         "name": "routes.py",
+         "omitted_children": 0,
+         "path": "demo/api/routes.py",
+         "size": 107,
+         "type": "file"
+        }
+       ],
+       "files": 2,
+       "ignored": false,
+       "name": "api",
+       "omitted_children": 0,
+       "path": "demo/api",
+       "size": 107,
+       "type": "dir"
+      },
+      {
+       "children": [
+        {
+         "children": null,
+         "files": 0,
+         "ignored": false,
+         "name": "__init__.py",
+         "omitted_children": 0,
+         "path": "demo/services/__init__.py",
+         "size": 0,
+         "type": "file"
+        },
+        {
+         "children": null,
+         "files": 0,
+         "ignored": false,
+         "name": "users.py",
+         "omitted_children": 0,
+         "path": "demo/services/users.py",
+         "size": 107,
+         "type": "file"
+        }
+       ],
+       "files": 2,
+       "ignored": false,
+       "name": "services",
+       "omitted_children": 0,
+       "path": "demo/services",
+       "size": 107,
+       "type": "dir"
+      },
+      {
+       "children": null,
+       "files": 0,
+       "ignored": false,
+       "name": "__init__.py",
+       "omitted_children": 0,
+       "path": "demo/__init__.py",
+       "size": 0,
+       "type": "file"
+      },
+      {
+       "children": null,
+       "files": 0,
+       "ignored": false,
+       "name": "cli.py",
+       "omitted_children": 0,
+       "path": "demo/cli.py",
+       "size": 117,
+       "type": "file"
+      }
+     ],
+     "files": 6,
+     "ignored": false,
+     "name": "demo",
+     "omitted_children": 0,
+     "path": "demo",
+     "size": 331,
+     "type": "dir"
+    },
+    {
+     "children": [
+      {
+       "children": null,
+       "files": 0,
+       "ignored": false,
+       "name": "index.md",
+       "omitted_children": 0,
+       "path": "docs/index.md",
+       "size": 7,
+       "type": "file"
+      }
+     ],
+     "files": 1,
+     "ignored": false,
+     "name": "docs",
+     "omitted_children": 0,
+     "path": "docs",
+     "size": 7,
+     "type": "dir"
+    },
+    {
+     "children": null,
+     "files": 1,
+     "ignored": true,
+     "name": "node_modules",
+     "omitted_children": 0,
+     "path": "node_modules",
+     "size": 19,
+     "type": "dir"
+    },
+    {
+     "children": [
+      {
+       "children": null,
+       "files": 0,
+       "ignored": false,
+       "name": "test_users.py",
+       "omitted_children": 0,
+       "path": "tests/test_users.py",
+       "size": 98,
+       "type": "file"
+      }
+     ],
+     "files": 1,
+     "ignored": false,
+     "name": "tests",
+     "omitted_children": 0,
+     "path": "tests",
+     "size": 98,
+     "type": "dir"
+    },
+    {
+     "children": null,
+     "files": 0,
+     "ignored": false,
+     "name": ".gitignore",
+     "omitted_children": 0,
+     "path": ".gitignore",
+     "size": 18,
+     "type": "file"
+    },
+    {
+     "children": null,
+     "files": 0,
+     "ignored": false,
+     "name": "CONTRIBUTING.md",
+     "omitted_children": 0,
+     "path": "CONTRIBUTING.md",
+     "size": 10,
+     "type": "file"
+    },
+    {
+     "children": null,
+     "files": 0,
+     "ignored": false,
+     "name": "Dockerfile",
+     "omitted_children": 0,
+     "path": "Dockerfile",
+     "size": 34,
+     "type": "file"
+    },
+    {
+     "children": null,
+     "files": 0,
+     "ignored": false,
+     "name": "LICENSE",
+     "omitted_children": 0,
+     "path": "LICENSE",
+     "size": 11,
+     "type": "file"
+    },
+    {
+     "children": null,
+     "files": 0,
+     "ignored": false,
+     "name": "pyproject.toml",
+     "omitted_children": 0,
+     "path": "pyproject.toml",
+     "size": 198,
+     "type": "file"
+    },
+    {
+     "children": null,
+     "files": 0,
+     "ignored": false,
+     "name": "README.md",
+     "omitted_children": 0,
+     "path": "README.md",
+     "size": 122,
+     "type": "file"
+    }
+   ],
+   "files": 16,
+   "ignored": false,
+   "name": "demo",
+   "omitted_children": 0,
+   "path": "",
+   "size": 945,
+   "type": "dir"
+  },
+  "tree_node_budget": 3000,
+  "truncated": false
+ }
+}

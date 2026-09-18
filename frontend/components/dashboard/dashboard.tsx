@@ -1,23 +1,35 @@
 import type { AnalysisReport } from "@/lib/api/types";
-import { formatBytes, formatCount } from "@/lib/format";
-import { Panel, Stat } from "../ui/primitives";
+import { DependenciesPanel } from "./dependencies-panel";
+import { DocumentationPanel } from "./documentation-panel";
+import { HealthPanel } from "./health-panel";
+import { LanguagesPanel } from "./languages-panel";
+import { OverviewPanel } from "./overview-panel";
 import { RepositoryHeader } from "./repository-header";
+import { SectionNav } from "./section-nav";
+import { StructurePanel } from "./structure-panel";
 
 export function Dashboard({ report }: { report: AnalysisReport }) {
-  const s = report.structure;
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <RepositoryHeader report={report} />
-      <Panel id="overview" title="Overview">
-        <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          <Stat label="Files" value={formatCount(s.total_files)} />
-          <Stat label="Directories" value={formatCount(s.total_directories)} />
-          <Stat label="Size on disk" value={formatBytes(s.total_size_bytes)} />
-          <Stat label="Languages" value={formatCount(report.languages.languages.length)} />
-          <Stat label="Dependencies" value={formatCount(report.dependencies.total)} />
-          <Stat label="Health indicator" value={report.health.overall ?? "—"} />
-        </dl>
-      </Panel>
+      <SectionNav
+        sections={[
+          { id: "overview", label: "Overview" },
+          { id: "health", label: "Health" },
+          { id: "structure", label: "Structure" },
+          { id: "languages", label: "Languages", count: report.languages.languages.length },
+          { id: "dependencies", label: "Dependencies", count: report.dependencies.total },
+          { id: "documentation", label: "Documentation" },
+        ]}
+      />
+      <OverviewPanel report={report} />
+      <HealthPanel health={report.health} />
+      <StructurePanel report={report} />
+      <div className="grid gap-5 xl:grid-cols-2">
+        <LanguagesPanel languages={report.languages} />
+        <DocumentationPanel doc={report.documentation} />
+      </div>
+      <DependenciesPanel deps={report.dependencies} />
     </div>
   );
 }
