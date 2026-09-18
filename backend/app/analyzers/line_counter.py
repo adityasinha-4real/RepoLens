@@ -82,3 +82,7 @@ def count_lines(text: str, language: str | None) -> LineCounts:
         else:
             counts.code += 1
     return counts
+
+
+def line_comment_prefixes(language: str | None) -> tuple[str, ...]:
+    return _SYNTAX.get(language or "", ((), ()))[0]
