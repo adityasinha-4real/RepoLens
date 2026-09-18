@@ -164,6 +164,12 @@ class GitHubClient:
                 date = None
         return sha, date
 
+    async def get_languages(self, ref: RepoRef) -> dict[str, int]:
+        data = await self._get_json(f"/repos/{ref.owner}/{ref.name}/languages")
+        if not isinstance(data, dict):
+            raise UpstreamError("GitHub returned a malformed languages response.")
+        return {str(k): v for k, v in data.items() if isinstance(v, int) and v >= 0}
+
     async def get_tree(self, ref: RepoRef, commit_sha: str) -> RepositoryTree:
         data = await self._get_json(
             f"/repos/{ref.owner}/{ref.name}/git/trees/{commit_sha}",
