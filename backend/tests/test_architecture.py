@@ -33,8 +33,8 @@ def test_python_imports_resolve_absolute_relative_and_skip_stdlib() -> None:
         "app/core/db.py": "",
         "app/models.py": "",
         "app/json.py": "",  # must not capture the stdlib 'json' import
-        "a/utils.py": "",
-        "b/utils.py": "",  # ambiguous
+        "src/utils.py": "",
+        "lib/utils.py": "",  # both are importable as `utils`: ambiguous
         "tool.py": "import utils\n",
     }
     graph = build_import_graph(list(files), files)
@@ -47,7 +47,7 @@ def test_python_imports_resolve_absolute_relative_and_skip_stdlib() -> None:
     assert ("app/api/routes.py", "app/core/db.py") in edges
     assert ("app/api/routes.py", "app/models.py") in edges
     assert not any(dst == "app/json.py" for _, dst in edges)
-    assert graph.stats.unresolved == 1  # `import utils` is ambiguous between a/ and b/
+    assert graph.stats.unresolved == 1  # `import utils` is ambiguous between src/ and lib/
     assert graph.stats.external == 3  # os, json, requests
 
 
@@ -248,3 +248,22 @@ def test_entry_points_skip_examples_and_fixtures() -> None:
     ]
     points = [p.path for p in detect_entry_points(paths, {})]
     assert points == ["src/main.ts"]
+
+
+def test_python_imports_only_resolve_at_plausible_sys_path_roots() -> None:
+    files = {
+        "src/flask/__init__.py": "",
+        "src/flask/app.py": "from flask import helpers",
+        "src/flask/helpers.py": "",
+        "tests/test_app.py": "import flask; from conftest import fixture",
+        "tests/conftest.py": "",
+        "tests/apps/inner/flask.py": "",  # fixture module that shadows the name
+        "scripts/run.py": "import helpers",  # not importable from scripts/
+    }
+    graph = build_import_graph(list(files), files)
+    edges = set(graph.edges)
+    assert ("tests/test_app.py", "src/flask/__init__.py") in edges
+    assert ("tests/test_app.py", "tests/conftest.py") in edges  # importer's own directory
+    assert ("src/flask/app.py", "src/flask/helpers.py") in edges
+    assert not any(dst == "tests/apps/inner/flask.py" for _, dst in edges)
+    assert not any(src == "scripts/run.py" for src, _ in edges)

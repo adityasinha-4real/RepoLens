@@ -1,4 +1,5 @@
 import type { AnalysisReport } from "@/lib/api/types";
+import { ArchitecturePanel } from "../architecture/architecture-panel";
 import { DependenciesPanel } from "./dependencies-panel";
 import { DocumentationPanel } from "./documentation-panel";
 import { HealthPanel } from "./health-panel";
@@ -20,6 +21,7 @@ export function Dashboard({ report }: { report: AnalysisReport }) {
           { id: "languages", label: "Languages", count: report.languages.languages.length },
           { id: "dependencies", label: "Dependencies", count: report.dependencies.total },
           { id: "documentation", label: "Documentation" },
+          { id: "architecture", label: "Architecture", count: report.architecture.modules.length },
         ]}
       />
       <OverviewPanel report={report} />
@@ -29,6 +31,7 @@ export function Dashboard({ report }: { report: AnalysisReport }) {
         <LanguagesPanel languages={report.languages} />
         <DocumentationPanel doc={report.documentation} />
       </div>
+      <ArchitecturePanel arch={report.architecture} />
       <DependenciesPanel deps={report.dependencies} />
     </div>
   );

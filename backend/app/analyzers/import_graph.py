@@ -61,8 +61,9 @@ class _Resolver:
                 self.dirs.add(parent)
                 parent = posixpath.dirname(parent)
 
-        # Python: dotted suffix -> files
-        self.py_index: dict[str, list[str]] = defaultdict(list)
+        # Python: dotted name -> [(file, import root)], where the import root is the directory
+        # that would have to be on sys.path for the dotted name to resolve to that file.
+        self.py_index: dict[str, list[tuple[str, str]]] = defaultdict(list)
         for p in paths:
             if not p.endswith(".py"):
                 continue
@@ -70,7 +71,7 @@ class _Resolver:
             if parts[-1] == "__init__":
                 parts = parts[:-1]
             for i in range(len(parts)):
-                self.py_index[".".join(parts[i:])].append(p)
+                self.py_index[".".join(parts[i:])].append((p, "/".join(parts[:i])))
 
         # JVM: "com/x/Foo" suffix lookups by class file name
         self.jvm_by_name: dict[str, list[str]] = defaultdict(list)
@@ -182,21 +183,27 @@ class _Resolver:
             return "unresolved", None
         if not parts or parts[0] in sys.stdlib_module_names:
             return "external", None
+        # Plausible sys.path entries: the repository root, conventional source roots, and every
+        # directory containing the importer (scripts and test runners add those).
+        roots = {"", "src", "lib", "source"}
+        parent = posixpath.dirname(importer)
+        while parent:
+            roots.add(parent)
+            parent = posixpath.dirname(parent)
         for end in range(len(parts), 0, -1):
-            matches = self.py_index.get(".".join(parts[:end]))
+            dotted = ".".join(parts[:end])
+            matches = sorted({f for f, root in self.py_index.get(dotted, []) if root in roots})
             if not matches:
-                directory = "/".join(parts[:end])
-                if directory in self.dirs:
-                    return "internal", directory  # namespace package rooted at the repo root
+                for root in sorted(roots, key=len):  # namespace package (no __init__.py)
+                    directory = (
+                        posixpath.join(root, *parts[:end]) if root else "/".join(parts[:end])
+                    )
+                    if directory in self.dirs:
+                        return "internal", directory
                 continue
             if len(matches) == 1:
                 return "internal", matches[0]
-            # Prefer a match rooted in the importer's top-level directory; otherwise ambiguous.
-            top = importer.split("/", 1)[0]
-            local = [m for m in matches if m.split("/", 1)[0] == top]
-            if len(local) == 1:
-                return "internal", local[0]
-            return "unresolved", None
+            return "unresolved", None  # ambiguous: never guess
         return "external", None
 
     # --- Go / Rust / JVM ----------------------------------------------------------

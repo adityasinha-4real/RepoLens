@@ -61,3 +61,18 @@ describe("Dashboard", () => {
     expect(within(docs).getByText("Contributing guide")).toBeInTheDocument();
   });
 });
+
+describe("Architecture", () => {
+  it("draws resolved module relationships and shows details for a selected module", async () => {
+    render(<Dashboard report={report} />);
+    const arch = screen.getByRole("region", { name: "Architecture" });
+    const graph = within(arch).getByRole("group", { name: "Module dependency graph" });
+    const services = within(graph).getByRole("button", { name: /^demo\/services,/ });
+    await userEvent.click(services);
+    expect(services).toHaveAttribute("aria-pressed", "true");
+    const details = within(arch).getByText("Imported by (2)").parentElement!;
+    expect(within(details).getByRole("button", { name: "demo/api" })).toBeInTheDocument();
+    expect(within(details).getByRole("button", { name: "tests" })).toBeInTheDocument();
+    expect(within(arch).getByText("FastAPI")).toBeInTheDocument();
+  });
+});
