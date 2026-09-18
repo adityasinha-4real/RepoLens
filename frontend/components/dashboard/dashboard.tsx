@@ -1,5 +1,6 @@
 import type { AnalysisReport } from "@/lib/api/types";
 import { ArchitecturePanel } from "../architecture/architecture-panel";
+import { AISummaryPanel } from "./ai-summary-panel";
 import { DependenciesPanel } from "./dependencies-panel";
 import { DocumentationPanel } from "./documentation-panel";
 import { HealthPanel } from "./health-panel";
@@ -29,6 +30,7 @@ export function Dashboard({ report }: { report: AnalysisReport }) {
         ]}
       />
       <OverviewPanel report={report} />
+      <AISummaryPanel repositoryUrl={report.repository.html_url} />
       <HealthPanel health={report.health} />
       <StructurePanel report={report} />
       <div className="grid gap-5 xl:grid-cols-2">

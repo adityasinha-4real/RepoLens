@@ -4,6 +4,28 @@
  */
 
 export interface paths {
+    "/api/ai/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ai Summary
+         * @description Optional AI narrative built from the deterministic report (never from raw code).
+         *
+         *     Returns 503 `ai_unavailable` when no provider is configured.
+         */
+        post: operations["ai_summary_api_ai_summary_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/analyze": {
         parameters: {
             query?: never;
@@ -87,6 +109,43 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AIStatus */
+        AIStatus: {
+            /** Enabled */
+            enabled: boolean;
+            /** Model */
+            model?: string | null;
+            /** Provider */
+            provider?: string | null;
+        };
+        /** AISummary */
+        AISummary: {
+            /** Architecture */
+            architecture: string;
+            /** Commit Sha */
+            commit_sha: string;
+            /** Disclaimer */
+            disclaimer: string;
+            /** Entry Points */
+            entry_points: string[];
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Key Modules */
+            key_modules: components["schemas"]["KeyModule"][];
+            /** Maintenance Concerns */
+            maintenance_concerns: string[];
+            /** Model */
+            model: string;
+            /** Onboarding Steps */
+            onboarding_steps: string[];
+            /** Provider */
+            provider: string;
+            /** Purpose */
+            purpose: string;
+        };
         /** AnalysisLimits */
         AnalysisLimits: {
             /** Max File Bytes */
@@ -478,6 +537,7 @@ export interface components {
         };
         /** HealthResponse */
         HealthResponse: {
+            ai: components["schemas"]["AIStatus"];
             /** Ai Enabled */
             ai_enabled: boolean;
             /** Status */
@@ -517,6 +577,13 @@ export interface components {
             detail: string;
             /** Kind */
             kind: string;
+            /** Path */
+            path: string;
+        };
+        /** KeyModule */
+        KeyModule: {
+            /** Description */
+            description: string;
             /** Path */
             path: string;
         };
@@ -1017,6 +1084,39 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    ai_summary_api_ai_summary_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalyzeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AISummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     analyze_api_analyze_post: {
         parameters: {
             query?: never;

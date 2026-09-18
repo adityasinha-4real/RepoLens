@@ -1,6 +1,123 @@
 {
   "components": {
     "schemas": {
+      "AIStatus": {
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "title": "AIStatus",
+        "type": "object"
+      },
+      "AISummary": {
+        "properties": {
+          "architecture": {
+            "maxLength": 2500,
+            "title": "Architecture",
+            "type": "string"
+          },
+          "commit_sha": {
+            "title": "Commit Sha",
+            "type": "string"
+          },
+          "disclaimer": {
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "entry_points": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Entry Points",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "key_modules": {
+            "items": {
+              "$ref": "#/components/schemas/KeyModule"
+            },
+            "maxItems": 10,
+            "title": "Key Modules",
+            "type": "array"
+          },
+          "maintenance_concerns": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "title": "Maintenance Concerns",
+            "type": "array"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "onboarding_steps": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "title": "Onboarding Steps",
+            "type": "array"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "purpose": {
+            "maxLength": 1500,
+            "title": "Purpose",
+            "type": "string"
+          }
+        },
+        "required": [
+          "purpose",
+          "architecture",
+          "key_modules",
+          "entry_points",
+          "maintenance_concerns",
+          "onboarding_steps",
+          "provider",
+          "model",
+          "commit_sha",
+          "generated_at",
+          "disclaimer"
+        ],
+        "title": "AISummary",
+        "type": "object"
+      },
       "AnalysisLimits": {
         "properties": {
           "max_file_bytes": {
@@ -1158,6 +1275,9 @@
       },
       "HealthResponse": {
         "properties": {
+          "ai": {
+            "$ref": "#/components/schemas/AIStatus"
+          },
           "ai_enabled": {
             "title": "Ai Enabled",
             "type": "boolean"
@@ -1174,7 +1294,8 @@
         "required": [
           "status",
           "version",
-          "ai_enabled"
+          "ai_enabled",
+          "ai"
         ],
         "title": "HealthResponse",
         "type": "object"
@@ -1269,6 +1390,26 @@
           "detail"
         ],
         "title": "InfraItem",
+        "type": "object"
+      },
+      "KeyModule": {
+        "properties": {
+          "description": {
+            "maxLength": 600,
+            "title": "Description",
+            "type": "string"
+          },
+          "path": {
+            "maxLength": 300,
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "description"
+        ],
+        "title": "KeyModule",
         "type": "object"
       },
       "LanguageAnalysis": {
@@ -2637,6 +2778,45 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/ai/summary": {
+      "post": {
+        "description": "Optional AI narrative built from the deterministic report (never from raw code).\n\nReturns 503 `ai_unavailable` when no provider is configured.",
+        "operationId": "ai_summary_api_ai_summary_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AISummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ai Summary"
+      }
+    },
     "/api/analyze": {
       "post": {
         "description": "Analyze a public repository and return the complete report.",

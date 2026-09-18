@@ -13,7 +13,9 @@ from fastapi.responses import JSONResponse
 
 from app.api.routes import router
 from app.core.config import APP_VERSION, Settings, get_settings
-from app.core.errors import RepoLensError
+from app.core.errors import AIUnavailableError, RepoLensError
+from app.services.ai.providers import build_provider
+from app.services.cache import TTLCache
 from app.services.github_client import build_http_client
 
 logger = logging.getLogger("repolens")
@@ -23,10 +25,15 @@ def error_body(code: str, message: str, details: dict | None = None) -> dict:
     return {"error": {"code": code, "message": message, "details": details or {}}}
 
 
+_UNSET = object()
+
+
 def create_app(
-    settings: Settings | None = None, transport: httpx.AsyncBaseTransport | None = None
+    settings: Settings | None = None,
+    transport: httpx.AsyncBaseTransport | None = None,
+    ai_provider: object = _UNSET,  # AIProvider | None; _UNSET builds from settings
 ) -> FastAPI:
-    """Build the app. `transport` lets tests substitute a fake GitHub."""
+    """Build the app. `transport` and `ai_provider` let tests substitute fakes."""
     settings = settings or get_settings()
     logging.basicConfig(
         level=settings.log_level.upper(),
@@ -37,6 +44,19 @@ def create_app(
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.http = build_http_client(settings, transport)
+        app.state.report_cache = TTLCache(settings.cache_max_entries, settings.cache_ttl_seconds)
+        app.state.ai_cache = TTLCache(settings.cache_max_entries, settings.ai_cache_ttl_seconds)
+        if ai_provider is not _UNSET:
+            app.state.ai = ai_provider
+        else:
+            try:
+                app.state.ai = build_provider(settings, app.state.http)
+            except AIUnavailableError as exc:
+                # Misconfigured AI must never take down the deterministic analysis.
+                logger.error("AI disabled: %s", exc.message)
+                app.state.ai = None
+        if app.state.ai is not None:
+            logger.info("AI summaries enabled (%s, %s)", app.state.ai.name, app.state.ai.model)
         try:
             yield
         finally:

@@ -15,6 +15,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Optional AI summaries via Claude. Not needed for the deterministic analysis.
+ai = [
+    "anthropic>=1.7",
+]
 dev = [
     "pytest>=8.3",
     "ruff>=0.6",

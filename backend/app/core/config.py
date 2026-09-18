@@ -28,6 +28,11 @@ class Settings(BaseSettings):
 
     rate_limit_per_minute: int = Field(default=10, ge=0)  # 0 disables the limiter
 
+    # In-process caches (0 disables). Results are reused only for identical requests.
+    cache_max_entries: int = Field(default=64, ge=0)
+    cache_ttl_seconds: float = Field(default=600, ge=0)
+    ai_cache_ttl_seconds: float = Field(default=3600, ge=0)
+
     ai_provider: str | None = None
     ai_api_key: SecretStr | None = None
     ai_model: str | None = None
