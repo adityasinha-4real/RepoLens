@@ -2,6 +2,7 @@ import type { AnalysisReport } from "@/lib/api/types";
 import { formatCount, formatDateTime, formatRelative } from "@/lib/format";
 import { ExternalIcon, ForkIcon, IssueIcon, StarIcon } from "../ui/icons";
 import { Badge } from "../ui/primitives";
+import { ExportMenu } from "./export-menu";
 
 export function RepositoryHeader({ report }: { report: AnalysisReport }) {
   const repo = report.repository;
@@ -42,6 +43,8 @@ export function RepositoryHeader({ report }: { report: AnalysisReport }) {
           </div>
         )}
       </div>
+      <div className="flex shrink-0 flex-col items-start gap-3 lg:items-end">
+      <ExportMenu report={report} />
       <dl className="flex shrink-0 flex-wrap gap-x-5 gap-y-2 text-sm">
         <Meta icon={<StarIcon size={14} />} label="Stars" value={formatCount(repo.stars)} />
         <Meta icon={<ForkIcon size={14} />} label="Forks" value={formatCount(repo.forks)} />
@@ -58,6 +61,7 @@ export function RepositoryHeader({ report }: { report: AnalysisReport }) {
           title={`${formatDateTime(meta.analyzed_at)} · commit ${meta.commit_sha.slice(0, 7)}`}
         />
       </dl>
+      </div>
     </header>
   );
 }

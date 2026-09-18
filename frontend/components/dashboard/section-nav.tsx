@@ -8,7 +8,7 @@ export function SectionNav({ sections }: { sections: SectionLink[] }) {
   return (
     <nav
       aria-label="Report sections"
-      className="sticky top-12 z-10 -mx-4 overflow-x-auto border-b border-border bg-background/95 px-4 backdrop-blur"
+      className="sticky top-12 z-10 print:hidden -mx-4 overflow-x-auto border-b border-border bg-background/95 px-4 backdrop-blur"
     >
       <ul className="flex gap-1 py-1.5 text-sm">
         {sections.map((s) => (
