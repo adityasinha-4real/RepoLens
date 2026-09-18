@@ -710,7 +710,8 @@ def analyze_security(
             key="security_policy",
             label="Security policy",
             passed=bool(security_policy),
-            detail=security_policy or "No SECURITY.md found.",
+            detail=security_policy
+            or "No SECURITY.md in this repository (organization-level policies are not checked).",
         ),
         HygieneCheck(
             key="dependency_updates",

@@ -5,7 +5,9 @@ import { DocumentationPanel } from "./documentation-panel";
 import { HealthPanel } from "./health-panel";
 import { LanguagesPanel } from "./languages-panel";
 import { OverviewPanel } from "./overview-panel";
+import { QualityPanel } from "./quality-panel";
 import { RepositoryHeader } from "./repository-header";
+import { SecurityPanel } from "./security-panel";
 import { SectionNav } from "./section-nav";
 import { StructurePanel } from "./structure-panel";
 
@@ -20,6 +22,8 @@ export function Dashboard({ report }: { report: AnalysisReport }) {
           { id: "structure", label: "Structure" },
           { id: "languages", label: "Languages", count: report.languages.languages.length },
           { id: "dependencies", label: "Dependencies", count: report.dependencies.total },
+          { id: "quality", label: "Code quality", count: report.quality.high_complexity_count },
+          { id: "security", label: "Security", count: report.security.findings.filter((f) => !f.in_test).length },
           { id: "documentation", label: "Documentation" },
           { id: "architecture", label: "Architecture", count: report.architecture.modules.length },
         ]}
@@ -31,6 +35,8 @@ export function Dashboard({ report }: { report: AnalysisReport }) {
         <LanguagesPanel languages={report.languages} />
         <DocumentationPanel doc={report.documentation} />
       </div>
+      <QualityPanel report={report} />
+      <SecurityPanel report={report} />
       <ArchitecturePanel arch={report.architecture} />
       <DependenciesPanel deps={report.dependencies} />
     </div>

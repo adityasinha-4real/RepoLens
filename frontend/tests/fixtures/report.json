@@ -715,7 +715,7 @@
       "points": 15.0
      },
      {
-      "detail": "No SECURITY.md found.",
+      "detail": "No SECURITY.md in this repository (organization-level policies are not checked).",
       "id": "security.policy",
       "label": "Security policy published",
       "max_points": 15.0,
@@ -1069,7 +1069,7 @@
     "passed": true
    },
    {
-    "detail": "No SECURITY.md found.",
+    "detail": "No SECURITY.md in this repository (organization-level policies are not checked).",
     "key": "security_policy",
     "label": "Security policy",
     "passed": false
