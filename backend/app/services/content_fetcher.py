@@ -11,6 +11,7 @@ count against the REST API rate limit.
 
 import asyncio
 import logging
+import posixpath
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -19,10 +20,15 @@ from urllib.parse import quote
 
 import httpx
 
-from app.analyzers.file_classifier import FileCategory, classify, ignored_segment
+from app.analyzers.file_classifier import (
+    FileCategory,
+    classify,
+    ignored_segment,
+    is_auxiliary_path,
+)
 from app.core.config import Settings
 from app.services.repository_parser import RepoRef
-from app.services.repository_tree import RepositoryTree, TreeEntry
+from app.services.repository_tree import RepositoryTree, TreeEntry, is_safe_path
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +49,11 @@ _SECURITY_CONFIG_NAMES = frozenset({
 })
 # fmt: on
 
+# Workspace layout and import-alias configuration used by the architecture analyzer.
+WORKSPACE_FILES = frozenset(
+    {"pnpm-workspace.yaml", "lerna.json", "go.work", "tsconfig.json", "jsconfig.json"}
+)
+MAX_WORKSPACE_FILES = 15
 MAX_MANIFESTS = 40
 MAX_DOCS = 20
 MAX_CONFIG = 40
@@ -91,6 +102,7 @@ class FetchStats:
 class FetchedContent:
     files: dict[str, str] = field(default_factory=dict)
     stats: FetchStats = field(default_factory=FetchStats)
+    symlink_targets: dict[str, str] = field(default_factory=dict)  # link path -> target path
 
 
 def select_files(tree: RepositoryTree, settings: Settings) -> list[TreeEntry]:
@@ -114,11 +126,24 @@ def select_files(tree: RepositoryTree, settings: Settings) -> list[TreeEntry]:
                 seen.add(e.path)
                 chosen.append(e)
 
-    # Shallow manifests first, so the root project's manifest always wins.
+    # Shallow manifests first, so the root project's manifest always wins; manifests of
+    # examples, fixtures and benchmarks come last.
     manifests = sorted(
-        (e for e in candidates if is_manifest(e.path)), key=lambda e: (e.path.count("/"), e.path)
+        (e for e in candidates if is_manifest(e.path)),
+        key=lambda e: (is_auxiliary_path(e.path), e.path.count("/"), e.path),
     )
     take(manifests, MAX_MANIFESTS)
+    take(
+        sorted(
+            (
+                e
+                for e in candidates
+                if PurePosixPath(e.path).name in WORKSPACE_FILES and not is_auxiliary_path(e.path)
+            ),
+            key=lambda e: (e.path.count("/"), e.path),
+        ),
+        MAX_WORKSPACE_FILES,
+    )
     take([e for e in candidates if _is_top_level_doc(e.path)], MAX_DOCS)
     take(
         sorted(
@@ -231,3 +256,45 @@ async def _download(http: httpx.AsyncClient, url: str, max_bytes: int) -> bytes:
                 raise _TooLargeError(url)
             chunks.append(chunk)
         return b"".join(chunks)
+
+
+async def resolve_doc_symlinks(
+    http: httpx.AsyncClient,
+    settings: Settings,
+    ref: RepoRef,
+    tree: RepositoryTree,
+    result: FetchedContent,
+) -> None:
+    """Resolve top-level documentation symlinks (e.g. README.md -> packages/app/README.md).
+
+    GitHub serves a symlink's raw content as its target path. The target is only followed if
+    it is a safe path inside the repository that points at a regular file in the tree."""
+    files = {e.path: e for e in tree.files()}
+    for entry in tree.entries:
+        if entry.type != "symlink" or "/" in entry.path or entry.path in result.files:
+            continue
+        if entry.path.lower().split(".", 1)[0] not in _DOC_STEMS:
+            continue
+        try:
+            raw = await _download(http, raw_url(settings, ref, tree.commit_sha, entry.path), 1024)
+            target = posixpath.normpath(raw.decode("utf-8", errors="strict").strip())
+        except (httpx.HTTPError, _FetchError, UnicodeDecodeError):
+            continue
+        if not is_safe_path(target) or target.startswith("../") or target not in files:
+            continue
+        target_entry = files[target]
+        if target_entry.size > settings.max_file_bytes:
+            continue
+        if target not in result.files:
+            try:
+                data = await _download(
+                    http, raw_url(settings, ref, tree.commit_sha, target), settings.max_file_bytes
+                )
+            except (httpx.HTTPError, _FetchError):
+                result.stats.failed += 1
+                continue
+            if b"\x00" in data[:BINARY_SNIFF_BYTES]:
+                continue
+            result.files[target] = data.decode("utf-8", errors="replace")
+        result.files[entry.path] = result.files[target]
+        result.symlink_targets[entry.path] = target

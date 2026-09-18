@@ -12,7 +12,12 @@ import httpx
 
 from app.core.config import Settings
 from app.schemas.repository import RateLimitInfo, RepositoryMetadata
-from app.services.content_fetcher import FetchStats, fetch_contents, select_files
+from app.services.content_fetcher import (
+    FetchStats,
+    fetch_contents,
+    resolve_doc_symlinks,
+    select_files,
+)
 from app.services.github_client import GitHubClient
 from app.services.repository_parser import RepoRef
 from app.services.repository_tree import RepositoryTree
@@ -22,7 +27,7 @@ logger = logging.getLogger(__name__)
 ProgressCallback = Callable[[str, str], Awaitable[None]]
 
 
-async def _noop(stage: str, message: str) -> None:
+async def noop_progress(stage: str, message: str) -> None:
     return None
 
 
@@ -44,7 +49,7 @@ async def collect_snapshot(
     http: httpx.AsyncClient,
     settings: Settings,
     ref: RepoRef,
-    progress: ProgressCallback = _noop,
+    progress: ProgressCallback = noop_progress,
 ) -> RepositorySnapshot:
     await progress("metadata", "Fetching repository metadata")
     metadata = await github.get_repository(ref)
@@ -59,6 +64,7 @@ async def collect_snapshot(
     selected = select_files(tree, settings)
     await progress("contents", f"Downloading {len(selected)} relevant files")
     fetched = await fetch_contents(http, settings, ref, tree, selected)
+    await resolve_doc_symlinks(http, settings, ref, tree, fetched)
     stats = fetched.stats
     if stats.failed or stats.rate_limited or stats.budget_exhausted:
         logger.info("Content fetch for %s: %s", ref.full_name, stats)

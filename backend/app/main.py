@@ -8,6 +8,7 @@ import httpx
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.routes import router
@@ -49,6 +50,8 @@ def create_app(
     )
     app.dependency_overrides[get_settings] = lambda: settings
 
+    # Reports for large repositories are several hundred KB of JSON; compress them.
+    app.add_middleware(GZipMiddleware, minimum_size=2048)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,

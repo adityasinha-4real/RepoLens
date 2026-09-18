@@ -12,7 +12,13 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 
-from app.analyzers.file_classifier import FileCategory, classify, ignored_segment, is_test_path
+from app.analyzers.file_classifier import (
+    FileCategory,
+    classify,
+    ignored_segment,
+    is_auxiliary_path,
+    is_test_path,
+)
 from app.schemas.security import (
     HygieneCheck,
     SecurityAnalysis,
@@ -237,7 +243,6 @@ SENSITIVE_FILES: list[tuple[re.Pattern[str], str, Severity, str]] = [
         "Committed database files can contain user data or credentials.",
     ),
 ]
-_KEY_FILE_EXCEPTIONS = _r(r"(^|/)(test|tests|fixtures?|testdata|examples?|docs?)/", re.IGNORECASE)
 
 ENV_USAGE_RE = _r(
     r"os\.environ(?:\.get)?\s*[\[(]\s*['\"](?P<a>[A-Z][A-Z0-9_]{1,80})['\"]|"
@@ -307,7 +312,7 @@ def _severity_for(base: Severity, in_test: bool) -> Severity:
 def scan_file(path: str, text: str) -> list[SecurityFinding]:
     cls = classify(path)
     language = cls.language
-    in_test = is_test_path(path) or bool(_KEY_FILE_EXCEPTIONS.search(path))
+    in_test = is_test_path(path) or is_auxiliary_path(path)
     is_docs = cls.category == FileCategory.DOCUMENTATION
     findings: list[SecurityFinding] = []
     per_rule: Counter[str] = Counter()
@@ -443,25 +448,53 @@ def unpinned_base_images(text: str) -> list[tuple[int, str]]:
     return found
 
 
+MAX_TEST_SENSITIVE_PER_KIND = 3
+
+
 def _sensitive_file_findings(paths: list[str]) -> list[SecurityFinding]:
-    findings = []
+    """One finding per sensitive file outside tests. Inside tests, examples and fixtures
+    (where such files are usually dummies) only the first few of each kind are listed and
+    the rest are summarized in one informational finding."""
+    findings: list[SecurityFinding] = []
+    test_matches: dict[str, list[str]] = {}
     for path in paths:
         for pattern, title, severity, description in SENSITIVE_FILES:
-            if pattern.search(path):
-                in_test = bool(_KEY_FILE_EXCEPTIONS.search(path)) or is_test_path(path)
-                findings.append(
-                    SecurityFinding(
-                        rule="file.sensitive",
-                        title=title,
-                        severity=_severity_for(severity, in_test),
-                        confidence="medium",
-                        category="sensitive-file",
-                        path=path,
-                        description=description,
-                        in_test=in_test,
-                    )
+            if not pattern.search(path):
+                continue
+            in_test = is_test_path(path) or is_auxiliary_path(path)
+            if in_test:
+                test_matches.setdefault(title, []).append(path)
+                if len(test_matches[title]) > MAX_TEST_SENSITIVE_PER_KIND:
+                    break
+            findings.append(
+                SecurityFinding(
+                    rule="file.sensitive",
+                    title=title,
+                    severity=_severity_for(severity, in_test),
+                    confidence="medium",
+                    category="sensitive-file",
+                    path=path,
+                    description=description,
+                    in_test=in_test,
                 )
-                break
+            )
+            break
+    for title, matched in test_matches.items():
+        extra = len(matched) - MAX_TEST_SENSITIVE_PER_KIND
+        if extra > 0:
+            findings.append(
+                SecurityFinding(
+                    rule="file.sensitive",
+                    title=f"{title} (+{extra} more in test/example paths)",
+                    severity="info",
+                    confidence="medium",
+                    category="sensitive-file",
+                    path=matched[MAX_TEST_SENSITIVE_PER_KIND],
+                    description=f"{extra} more file(s) of this kind were found in test, example or "
+                    "fixture directories, where they are usually dummy values.",
+                    in_test=True,
+                )
+            )
     return findings
 
 

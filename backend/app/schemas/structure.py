@@ -47,6 +47,7 @@ class StructureAnalysis(BaseModel):
     symlinks: int
     submodules: list[str]
     max_depth: int
+    product_max_depth: int  # excluding tests, examples, fixtures and benchmarks
     oversized_files: int  # larger than the per-file download limit; not content-analyzed
     categories: list[CategoryStat]
     largest_files: list[FileStat]

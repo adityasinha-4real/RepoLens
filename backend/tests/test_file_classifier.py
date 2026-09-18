@@ -82,3 +82,10 @@ def test_test_detection_is_not_fooled_by_substrings() -> None:
     assert not is_test_path("src/contest/solver.py")
     assert not is_test_path("src/attestation.py")
     assert is_test_path("spec/models/user_spec.rb")
+
+
+def test_output_dir_names_inside_source_trees_are_not_ignored() -> None:
+    assert ignored_segment("packages/next/src/build/webpack.ts") is None
+    assert ignored_segment("lib/dist/helpers.js") is None
+    assert ignored_segment("packages/next/dist/index.js") == "dist"
+    assert ignored_segment("src/node_modules/x.js") == "node_modules"  # always ignored

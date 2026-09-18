@@ -256,7 +256,9 @@ def analyze_documentation(
     license_name: str | None,
 ) -> DocumentationAnalysis:
     file_paths = [e.path for e in tree.files() if ignored_segment(e.path) is None]
-    paths = set(file_paths)
+    # Root-level symlinks (e.g. README.md -> packages/x/README.md) count as documents too.
+    root_links = [e.path for e in tree.entries if e.type == "symlink" and "/" not in e.path]
+    paths = set(file_paths) | set(root_links)
     dirs = {e.path for e in tree.entries if e.type == "dir"}
     for p in file_paths:  # trees can be truncated; derive parent directories too
         parent = posixpath.dirname(p)
@@ -276,7 +278,7 @@ def analyze_documentation(
 
     top_level = [
         p
-        for p in file_paths
+        for p in file_paths + root_links
         if p.count("/") == 0 or (p.startswith((".github/", "docs/")) and p.count("/") == 1)
     ]
     files: list[PresenceCheck] = []

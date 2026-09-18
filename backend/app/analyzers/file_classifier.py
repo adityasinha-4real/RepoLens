@@ -4,6 +4,7 @@ Everything here is a pure function of the path (and size), so results are determ
 and never require downloading the file.
 """
 
+import re
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import PurePosixPath
@@ -130,15 +131,44 @@ class FileClass:
     language: str | None
 
 
+_AUXILIARY_DIR_RE = re.compile(
+    r"(^|/)(examples?|samples?|demos?|fixtures?|__fixtures__|testdata|test-fixtures|tests?|"
+    r"__tests__|e2e|bench|benchmarks?|playground|templates?|docs?)/",
+    re.IGNORECASE,
+)
+
+
+def is_auxiliary_path(path: str) -> bool:
+    """True for paths inside examples, fixtures, tests, benchmarks, templates or docs:
+    code that ships with a repository but is not its main product."""
+    return bool(_AUXILIARY_DIR_RE.search(path))
+
+
+# Generic build-output names are only treated as output outside source trees:
+# `dist/` at a package root is an artifact, `src/build/` is source code.
+OUTPUT_DIR_NAMES: frozenset[str] = frozenset({"build", "dist", "out", "target", "obj", "_build"})
+SOURCE_ROOT_NAMES: frozenset[str] = frozenset({"src", "lib", "source", "sources"})
+
+
+def ignored_index(segments: list[str]) -> int | None:
+    """Index of the first ignored directory among `segments` (directory names only)."""
+    inside_source = False
+    for i, segment in enumerate(segments):
+        if segment in IGNORED_DIRS and not (inside_source and segment in OUTPUT_DIR_NAMES):
+            return i
+        if segment in SOURCE_ROOT_NAMES:
+            inside_source = True
+    return None
+
+
 def ignored_segment(path: str) -> str | None:
     """Return the first ignored directory segment in `path`, if any.
 
     Only directory segments count: a *file* called `build` is not ignored.
     """
-    for segment in path.split("/")[:-1]:
-        if segment in IGNORED_DIRS:
-            return segment
-    return None
+    segments = path.split("/")[:-1]
+    index = ignored_index(segments)
+    return segments[index] if index is not None else None
 
 
 def detect_language(path: str) -> str | None:

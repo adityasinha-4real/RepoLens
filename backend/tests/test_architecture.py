@@ -207,3 +207,44 @@ def test_analyze_architecture_modules_and_edges() -> None:
     assert [t.name for t in arch.project_types] == ["Web / API service"]
     assert arch.compose_services[0].name == "app"
     assert arch.import_resolution.files_parsed == 5
+
+
+def test_workspace_globs_drive_package_detection() -> None:
+    from app.analyzers.architecture_analyzer import workspace_globs
+
+    contents = {
+        "pnpm-workspace.yaml": "packages:\n  - 'packages/*'\n  - \"apps/**\"\n"
+        "  - '!packages/internal-*'\ncatalog:\n  x: 1\n",
+        "package.json": '{"workspaces": {"packages": ["tools/cli"]}}',
+    }
+    assert workspace_globs(contents) == [
+        "packages/*",
+        "apps/**",
+        "!packages/internal-*",
+        "tools/cli",
+    ]
+    paths = [
+        "package.json",
+        "pnpm-workspace.yaml",
+        "packages/ui/package.json",
+        "packages/internal-x/package.json",
+        "apps/web/package.json",
+        "apps/docs/site/package.json",
+        "bench/perf/package.json",
+        "tools/cli/package.json",
+        "packages/ui/src/nested/package.json",
+    ]
+    tool, packages = detect_monorepo(paths, contents)
+    assert tool == "pnpm workspaces"
+    assert packages == ["apps/docs/site", "apps/web", "packages/ui", "tools/cli"]
+
+
+def test_entry_points_skip_examples_and_fixtures() -> None:
+    paths = [
+        "examples/basic/main.py",
+        "test/fixtures/app/page.tsx",
+        "bench/app/index.js",
+        "src/main.ts",
+    ]
+    points = [p.path for p in detect_entry_points(paths, {})]
+    assert points == ["src/main.ts"]

@@ -54,3 +54,9 @@ def test_rate_limit_returns_429_with_reset(settings: Settings) -> None:
     error = response.json()["error"]
     assert error["code"] == "rate_limited"
     assert error["details"]["reset_at"].startswith("2030-")
+
+
+def test_large_responses_are_gzip_compressed(settings: Settings) -> None:
+    with make_client(settings) as client:
+        response = client.get("/openapi.json", headers={"Accept-Encoding": "gzip"})
+    assert response.headers.get("content-encoding") == "gzip"

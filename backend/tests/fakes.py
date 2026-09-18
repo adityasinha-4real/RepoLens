@@ -50,6 +50,7 @@ class FakeGitHub:
     name: str = "demo"
     repo: dict | None = None
     files: dict[str, str | bytes] = field(default_factory=dict)
+    symlinks: dict[str, str] = field(default_factory=dict)  # link path -> target text
     languages: dict[str, int] | None = None
     tree_truncated: bool = False
     commit_sha: str = "abc123"
@@ -78,6 +79,14 @@ class FakeGitHub:
                 "mode": "100644",
                 "sha": f"sha-{path}",
                 "size": len(raw),
+            }
+        for path, target in self.symlinks.items():
+            entries[path] = {
+                "path": path,
+                "type": "blob",
+                "mode": "120000",
+                "sha": f"sha-{path}",
+                "size": len(target),
             }
         return sorted(entries.values(), key=lambda e: e["path"])
 
@@ -118,7 +127,7 @@ class FakeGitHub:
             prefix = f"/{self.owner}/{self.name}/{self.commit_sha}/"
             if path.startswith(prefix):
                 file_path = httpx.URL(request.url).path[len(prefix) :]
-                content = self.files.get(file_path)
+                content = self.files.get(file_path, self.symlinks.get(file_path))
                 if content is not None:
                     body = content.encode() if isinstance(content, str) else content
                     return httpx.Response(200, content=body)

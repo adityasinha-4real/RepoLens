@@ -6,7 +6,7 @@ import heapq
 from collections import Counter, defaultdict, deque
 from dataclasses import dataclass, field
 
-from app.analyzers.file_classifier import IGNORED_DIRS, classify
+from app.analyzers.file_classifier import classify, ignored_index, is_auxiliary_path
 from app.schemas.structure import (
     CategoryStat,
     DirectoryStat,
@@ -36,10 +36,8 @@ def _ignored_root(path: str, *, is_dir: bool) -> str | None:
 
     A *file* named like an ignored directory (e.g. a script called `build`) is not ignored."""
     parts = path.split("/")
-    for i, segment in enumerate(parts if is_dir else parts[:-1]):
-        if segment in IGNORED_DIRS:
-            return "/".join(parts[: i + 1])
-    return None
+    index = ignored_index(parts if is_dir else parts[:-1])
+    return "/".join(parts[: index + 1]) if index is not None else None
 
 
 def _insert(root: _Node, path: str, type_: str, size: int) -> None:
@@ -123,7 +121,7 @@ def analyze_structure(
     sizes: list[tuple[int, str]] = []
 
     total_files = total_bytes = analyzed_files = analyzed_bytes = 0
-    directories = symlinks = oversized = max_depth = 0
+    directories = symlinks = oversized = max_depth = product_depth = 0
     submodules: list[str] = []
 
     for entry in tree.entries:
@@ -153,7 +151,10 @@ def analyze_structure(
             continue
 
         _insert(root, entry.path, entry.type, entry.size)
-        max_depth = max(max_depth, entry.path.count("/") + 1)
+        depth = entry.path.count("/") + 1
+        max_depth = max(max_depth, depth)
+        if not is_auxiliary_path(entry.path):
+            product_depth = max(product_depth, depth)
         if entry.type != "file":
             continue
 
@@ -202,6 +203,7 @@ def analyze_structure(
         symlinks=symlinks,
         submodules=sorted(submodules)[:50],
         max_depth=max_depth,
+        product_max_depth=product_depth,
         oversized_files=oversized,
         categories=sorted(
             (

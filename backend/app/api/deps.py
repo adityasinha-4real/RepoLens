@@ -21,3 +21,4 @@ def get_github_client(
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 GitHubDep = Annotated[GitHubClient, Depends(get_github_client)]
+HttpDep = Annotated[httpx.AsyncClient, Depends(get_http_client)]

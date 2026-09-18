@@ -138,3 +138,21 @@ async def test_collect_snapshot_end_to_end(settings: Settings) -> None:
     assert snap.github_languages == {"Python": 11}
     assert snap.api_calls == 4  # repo, commit, tree, languages - raw fetches are free
     assert snap.tree.commit_sha == "abc123"
+
+
+async def test_root_doc_symlinks_are_resolved_safely(settings: Settings) -> None:
+    fake = FakeGitHub(
+        files={"packages/app/README.md": "# Real readme\n", "secret.txt": "nope"},
+        symlinks={
+            "README.md": "packages/app/README.md",
+            "LICENSE": "../../etc/passwd",
+            "CHANGELOG.md": "missing.md",
+            "src-link": "packages/app",
+        },
+    )
+    async with build_http_client(settings, fake.transport()) as http:
+        snap = await collect_snapshot(GitHubClient(http, settings), http, settings, REF)
+    assert snap.contents["README.md"] == "# Real readme\n"
+    assert "LICENSE" not in snap.contents  # escapes the repository: never followed
+    assert "CHANGELOG.md" not in snap.contents  # target not in tree
+    assert "src-link" not in snap.contents  # only documentation symlinks are resolved

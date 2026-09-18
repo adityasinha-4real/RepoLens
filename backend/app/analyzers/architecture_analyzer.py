@@ -11,7 +11,12 @@ import tomllib
 from collections import Counter, defaultdict
 from pathlib import PurePosixPath
 
-from app.analyzers.file_classifier import FileCategory, classify, ignored_segment
+from app.analyzers.file_classifier import (
+    FileCategory,
+    classify,
+    ignored_segment,
+    is_auxiliary_path,
+)
 from app.analyzers.import_graph import build_import_graph
 from app.schemas.architecture import (
     ArchitectureAnalysis,
@@ -232,17 +237,24 @@ def detect_monorepo(paths: list[str], contents: dict[str, str]) -> tuple[str | N
     cargo = contents.get("Cargo.toml")
     if tool is None and cargo and "[workspace]" in cargo:
         tool = "Cargo workspace"
-    packages = sorted(
+    manifest_dirs = sorted(
         {
             posixpath.dirname(p)
             for p in paths
-            if "/" in p
-            and is_manifest(p)
-            and not PurePosixPath(p).name.startswith("requirements")
-            and classify(p).category != FileCategory.DOCUMENTATION
-            and not re.search(r"(^|/)(examples?|fixtures?|tests?|docs?|templates?)/", p)
+            if "/" in p and is_manifest(p) and not PurePosixPath(p).name.startswith("requirements")
         }
     )
+    globs = workspace_globs(contents)
+    if globs:
+        include = [_glob_regex(g) for g in globs if not g.startswith("!")]
+        exclude = [_glob_regex(g[1:]) for g in globs if g.startswith("!")]
+        packages = [
+            d
+            for d in manifest_dirs
+            if any(r.fullmatch(d) for r in include) and not any(r.fullmatch(d) for r in exclude)
+        ]
+    else:
+        packages = [d for d in manifest_dirs if not is_auxiliary_path(d + "/")]
     if tool is None and len(packages) < 2:
         return None, []
     if tool is None:
@@ -250,38 +262,114 @@ def detect_monorepo(paths: list[str], contents: dict[str, str]) -> tuple[str | N
     return tool, packages[:60]
 
 
-def _choose_module_paths(paths: list[str], packages: list[str]) -> list[str]:
-    source_counts: Counter[str] = Counter()
-    for p in paths:
-        if classify(p).category in (FileCategory.SOURCE, FileCategory.TEST):
-            source_counts[p.split("/", 1)[0] if "/" in p else ""] += 1
-
-    if len(packages) >= 2:
-        modules = set(packages)
-        for p in paths:  # top-level directories that are not covered by any package
-            top = p.split("/", 1)[0] if "/" in p else ""
-            if (
-                top
-                and not any(pkg == top or pkg.startswith(top + "/") for pkg in modules)
-                and not any(p.startswith(pkg + "/") for pkg in modules)
-            ):
-                modules.add(top)
-        return sorted(modules)
-
-    tops = sorted({p.split("/", 1)[0] for p in paths if "/" in p})
-    total_source = sum(source_counts.values()) or 1
-    modules: list[str] = []
-    for top in tops:
-        subdirs = sorted(
-            {p.split("/")[1] for p in paths if p.startswith(top + "/") and p.count("/") >= 2}
-        )
-        share = source_counts[top] / total_source
-        if top.lower() in EXPANDABLE_DIRS and len(subdirs) >= 2 and share >= 0.3:
-            modules += [f"{top}/{s}" for s in subdirs]
-            if any(p.startswith(top + "/") and p.count("/") == 1 for p in paths):
-                modules.append(top)  # files directly inside `top`
+def _glob_regex(glob: str) -> re.Pattern[str]:
+    glob = glob.strip().strip("/").removeprefix("./")
+    out = ""
+    i = 0
+    while i < len(glob):
+        if glob.startswith("**", i):
+            out += ".*"
+            i += 2
+        elif glob[i] == "*":
+            out += "[^/]*"
+            i += 1
+        elif glob[i] == "?":
+            out += "[^/]"
+            i += 1
         else:
-            modules.append(top)
+            out += re.escape(glob[i])
+            i += 1
+    return re.compile(out.replace("/.*", "(?:/.*)?"))
+
+
+def workspace_globs(contents: dict[str, str]) -> list[str]:
+    """Workspace member patterns declared by pnpm, npm/yarn, Lerna, Cargo or go.work."""
+    globs: list[str] = []
+    pnpm = contents.get("pnpm-workspace.yaml")
+    if pnpm:
+        in_packages = False
+        for line in pnpm.splitlines():
+            if re.match(r"^packages\s*:", line):
+                in_packages = True
+                continue
+            if in_packages:
+                m = re.match(r"^\s+-\s*['\"]?([^'\"#]+?)['\"]?\s*(#.*)?$", line)
+                if m:
+                    globs.append(m.group(1))
+                elif line.strip() and not line.startswith((" ", "\t")):
+                    in_packages = False
+    for name in ("package.json", "lerna.json"):
+        try:
+            data = json.loads(contents.get(name, "") or "null")
+        except (ValueError, RecursionError):
+            data = None
+        if isinstance(data, dict):
+            ws = data.get("workspaces") if name == "package.json" else data.get("packages")
+            if isinstance(ws, dict):
+                ws = ws.get("packages")
+            if isinstance(ws, list):
+                globs += [g for g in ws if isinstance(g, str)]
+    cargo = contents.get("Cargo.toml")
+    if cargo and "[workspace]" in cargo:
+        try:
+            members = tomllib.loads(cargo).get("workspace", {}).get("members", [])
+        except (tomllib.TOMLDecodeError, RecursionError):
+            members = []
+        globs += [m for m in members if isinstance(m, str)]
+    go_work = contents.get("go.work")
+    if go_work:
+        globs += [
+            m.removeprefix("./")
+            for m in re.findall(r"^\s*(?:use\s+)?(\./[\w./-]+)", go_work, re.MULTILINE)
+        ]
+    return globs[:100]
+
+
+def _choose_module_paths(paths: list[str], packages: list[str]) -> list[str]:
+    if len(packages) >= 2:
+        # Packages plus every top-level directory: longest-prefix matching routes package
+        # files to their package and everything else to its top-level directory.
+        chosen = set(packages) | {p.split("/", 1)[0] for p in paths if "/" in p}
+        return sorted(chosen)
+
+    # Source files below every directory, and the directory tree itself.
+    source_below: Counter[str] = Counter()
+    children: dict[str, set[str]] = defaultdict(set)
+    direct_files: Counter[str] = Counter()
+    for p in paths:
+        parts = p.split("/")
+        # Only production source decides where the code "lives"; large test suites would
+        # otherwise dilute the share of the real source directory.
+        is_source = classify(p).category == FileCategory.SOURCE
+        direct_files["/".join(parts[:-1])] += 1
+        for i in range(1, len(parts)):
+            parent, child = "/".join(parts[: i - 1]), "/".join(parts[:i])
+            children[parent].add(child)
+            if is_source:
+                source_below[child] += 1
+    total_source = sum(source_below[c] for c in children[""]) or 1
+
+    def expand(directory: str, depth: int) -> list[str]:
+        subdirs = sorted(children.get(directory, ()))
+        with_source = [d for d in subdirs if source_below[d] > 0]
+        if (
+            depth < 3
+            and len(with_source) == 1
+            and direct_files[directory] == 0
+            and len(subdirs) == 1
+        ):
+            return expand(with_source[0], depth + 1)  # e.g. src/<package>/...
+        if depth < 3 and len(with_source) >= 2:
+            return subdirs + ([directory] if direct_files[directory] else [])
+        return [directory]
+
+    modules: list[str] = []
+    for top in sorted(children[""]):
+        share = source_below[top] / total_source
+        # Split the directory that holds most of the code into its sub-modules; conventional
+        # container names (src, packages, ...) are split at a lower share.
+        threshold = 0.3 if top.lower() in EXPANDABLE_DIRS else 0.5
+        modules += expand(top, 0) if share >= threshold else [top]
     return modules
 
 
@@ -325,6 +413,8 @@ def detect_entry_points(paths: list[str], contents: dict[str, str]) -> list[Entr
         ("main.py", "Python application"),
     ]
     for p in sorted(path_set):
+        if is_auxiliary_path(p):
+            continue  # examples, fixtures, tests and benchmarks are not the product
         name = PurePosixPath(p).name
         for suffix, kind in conventions:
             if (
@@ -339,6 +429,8 @@ def detect_entry_points(paths: list[str], contents: dict[str, str]) -> list[Entr
             add(p, "Go command", "cmd/<name>/main.go convention")
 
     for p, text in contents.items():
+        if is_auxiliary_path(p):
+            continue
         name = PurePosixPath(p).name
         if name == "package.json":
             try:

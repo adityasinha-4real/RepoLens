@@ -218,3 +218,15 @@ def test_helpers() -> None:
     assert shannon_entropy("abcd") == 2
     assert redact("abcdefghijkl") == "abcd********(12 chars)"
     assert redact("short") == "********(5 chars)"
+
+
+def test_sensitive_files_in_fixtures_are_aggregated() -> None:
+    paths = [f"test/e2e/app{i}/.env" for i in range(10)] + ["bench/app/.env.dev", ".env.prod"]
+    tree = RepositoryTree("sha", [TreeEntry(p, "file", 5) for p in paths])
+    result = analyze_security(tree, {}, has_lockfiles=True)
+    sensitive = [f for f in result.findings if f.rule == "file.sensitive"]
+    assert [f.path for f in sensitive if not f.in_test] == [".env.prod"]
+    summary = [f for f in sensitive if "more in test/example paths" in f.title]
+    assert len(summary) == 1 and summary[0].severity == "info"
+    assert "+8 more" in summary[0].title  # 11 in test paths: 3 listed, 8 summarized
+    assert len(sensitive) == 5
