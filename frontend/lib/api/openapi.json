@@ -1,0 +1,2781 @@
+{
+  "components": {
+    "schemas": {
+      "AnalysisLimits": {
+        "properties": {
+          "max_file_bytes": {
+            "title": "Max File Bytes",
+            "type": "integer"
+          },
+          "max_files_to_fetch": {
+            "title": "Max Files To Fetch",
+            "type": "integer"
+          },
+          "max_total_fetch_bytes": {
+            "title": "Max Total Fetch Bytes",
+            "type": "integer"
+          },
+          "max_tree_entries": {
+            "title": "Max Tree Entries",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "max_tree_entries",
+          "max_files_to_fetch",
+          "max_file_bytes",
+          "max_total_fetch_bytes"
+        ],
+        "title": "AnalysisLimits",
+        "type": "object"
+      },
+      "AnalysisMeta": {
+        "properties": {
+          "analyzed_at": {
+            "format": "date-time",
+            "title": "Analyzed At",
+            "type": "string"
+          },
+          "commit_sha": {
+            "title": "Commit Sha",
+            "type": "string"
+          },
+          "duration_ms": {
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "engine_version": {
+            "title": "Engine Version",
+            "type": "string"
+          },
+          "fetch": {
+            "$ref": "#/components/schemas/FetchSummary"
+          },
+          "github_api_calls": {
+            "title": "Github Api Calls",
+            "type": "integer"
+          },
+          "head_commit_date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Head Commit Date"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/AnalysisLimits"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "partial": {
+            "title": "Partial",
+            "type": "boolean"
+          },
+          "rate_limit": {
+            "$ref": "#/components/schemas/RateLimitInfo"
+          }
+        },
+        "required": [
+          "analyzed_at",
+          "duration_ms",
+          "commit_sha",
+          "head_commit_date",
+          "github_api_calls",
+          "rate_limit",
+          "fetch",
+          "limits",
+          "partial",
+          "notes",
+          "engine_version"
+        ],
+        "title": "AnalysisMeta",
+        "type": "object"
+      },
+      "AnalysisReport": {
+        "properties": {
+          "analysis": {
+            "$ref": "#/components/schemas/AnalysisMeta"
+          },
+          "architecture": {
+            "$ref": "#/components/schemas/ArchitectureAnalysis"
+          },
+          "dependencies": {
+            "$ref": "#/components/schemas/DependencyAnalysis"
+          },
+          "documentation": {
+            "$ref": "#/components/schemas/DocumentationAnalysis"
+          },
+          "health": {
+            "$ref": "#/components/schemas/HealthReport"
+          },
+          "languages": {
+            "$ref": "#/components/schemas/LanguageAnalysis"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/QualityAnalysis"
+          },
+          "repository": {
+            "$ref": "#/components/schemas/RepositoryMetadata"
+          },
+          "schema_version": {
+            "default": "1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "security": {
+            "$ref": "#/components/schemas/SecurityAnalysis"
+          },
+          "structure": {
+            "$ref": "#/components/schemas/StructureAnalysis"
+          }
+        },
+        "required": [
+          "repository",
+          "analysis",
+          "health",
+          "structure",
+          "languages",
+          "dependencies",
+          "quality",
+          "documentation",
+          "security",
+          "architecture"
+        ],
+        "title": "AnalysisReport",
+        "type": "object"
+      },
+      "AnalyzeRequest": {
+        "properties": {
+          "repository_url": {
+            "examples": [
+              "https://github.com/psf/requests"
+            ],
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Repository Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "repository_url"
+        ],
+        "title": "AnalyzeRequest",
+        "type": "object"
+      },
+      "ArchitectureAnalysis": {
+        "properties": {
+          "compose_services": {
+            "items": {
+              "$ref": "#/components/schemas/ComposeService"
+            },
+            "title": "Compose Services",
+            "type": "array"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/ModuleEdge"
+            },
+            "title": "Edges",
+            "type": "array"
+          },
+          "entry_points": {
+            "items": {
+              "$ref": "#/components/schemas/EntryPoint"
+            },
+            "title": "Entry Points",
+            "type": "array"
+          },
+          "frameworks": {
+            "items": {
+              "$ref": "#/components/schemas/Detection"
+            },
+            "title": "Frameworks",
+            "type": "array"
+          },
+          "hubs": {
+            "items": {
+              "$ref": "#/components/schemas/FileHub"
+            },
+            "title": "Hubs",
+            "type": "array"
+          },
+          "import_resolution": {
+            "$ref": "#/components/schemas/ImportResolution"
+          },
+          "infrastructure": {
+            "items": {
+              "$ref": "#/components/schemas/InfraItem"
+            },
+            "title": "Infrastructure",
+            "type": "array"
+          },
+          "methodology": {
+            "title": "Methodology",
+            "type": "string"
+          },
+          "modules": {
+            "items": {
+              "$ref": "#/components/schemas/Module"
+            },
+            "title": "Modules",
+            "type": "array"
+          },
+          "monorepo_tool": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Monorepo Tool"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "project_types": {
+            "items": {
+              "$ref": "#/components/schemas/Detection"
+            },
+            "title": "Project Types",
+            "type": "array"
+          },
+          "workspace_packages": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Workspace Packages",
+            "type": "array"
+          }
+        },
+        "required": [
+          "project_types",
+          "frameworks",
+          "monorepo_tool",
+          "workspace_packages",
+          "entry_points",
+          "modules",
+          "edges",
+          "hubs",
+          "compose_services",
+          "infrastructure",
+          "import_resolution",
+          "methodology",
+          "notes"
+        ],
+        "title": "ArchitectureAnalysis",
+        "type": "object"
+      },
+      "CategoryStat": {
+        "properties": {
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "files": {
+            "title": "Files",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "category",
+          "files",
+          "bytes"
+        ],
+        "title": "CategoryStat",
+        "type": "object"
+      },
+      "CommentedCodeFile": {
+        "properties": {
+          "lines": {
+            "title": "Lines",
+            "type": "integer"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "lines"
+        ],
+        "title": "CommentedCodeFile",
+        "type": "object"
+      },
+      "ComplexityItem": {
+        "properties": {
+          "complexity": {
+            "title": "Complexity",
+            "type": "integer"
+          },
+          "length": {
+            "title": "Length",
+            "type": "integer"
+          },
+          "line": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line"
+          },
+          "max_nesting": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Nesting"
+          },
+          "method": {
+            "enum": [
+              "python-ast",
+              "heuristic"
+            ],
+            "title": "Method",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "name",
+          "line",
+          "complexity",
+          "length",
+          "method"
+        ],
+        "title": "ComplexityItem",
+        "type": "object"
+      },
+      "ComposeService": {
+        "properties": {
+          "build": {
+            "default": false,
+            "title": "Build",
+            "type": "boolean"
+          },
+          "depends_on": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Depends On",
+            "type": "array"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ComposeService",
+        "type": "object"
+      },
+      "Dependency": {
+        "properties": {
+          "constraint": {
+            "enum": [
+              "exact",
+              "range",
+              "none",
+              "managed",
+              "external"
+            ],
+            "title": "Constraint",
+            "type": "string"
+          },
+          "direct": {
+            "default": true,
+            "title": "Direct",
+            "type": "boolean"
+          },
+          "ecosystem": {
+            "title": "Ecosystem",
+            "type": "string"
+          },
+          "manifest": {
+            "title": "Manifest",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "scope": {
+            "title": "Scope",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "ecosystem",
+          "scope",
+          "manifest",
+          "source",
+          "constraint"
+        ],
+        "title": "Dependency",
+        "type": "object"
+      },
+      "DependencyAnalysis": {
+        "properties": {
+          "dependencies": {
+            "items": {
+              "$ref": "#/components/schemas/Dependency"
+            },
+            "title": "Dependencies",
+            "type": "array"
+          },
+          "dependencies_truncated": {
+            "title": "Dependencies Truncated",
+            "type": "boolean"
+          },
+          "development": {
+            "title": "Development",
+            "type": "integer"
+          },
+          "ecosystems": {
+            "items": {
+              "$ref": "#/components/schemas/EcosystemSummary"
+            },
+            "title": "Ecosystems",
+            "type": "array"
+          },
+          "external_sources": {
+            "title": "External Sources",
+            "type": "integer"
+          },
+          "lockfiles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Lockfiles",
+            "type": "array"
+          },
+          "manifests": {
+            "items": {
+              "$ref": "#/components/schemas/ManifestSummary"
+            },
+            "title": "Manifests",
+            "type": "array"
+          },
+          "manifests_not_analyzed": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Manifests Not Analyzed",
+            "type": "array"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "other": {
+            "title": "Other",
+            "type": "integer"
+          },
+          "production": {
+            "title": "Production",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "unconstrained": {
+            "title": "Unconstrained",
+            "type": "integer"
+          },
+          "unique_packages": {
+            "title": "Unique Packages",
+            "type": "integer"
+          },
+          "version_conflicts": {
+            "items": {
+              "$ref": "#/components/schemas/VersionConflict"
+            },
+            "title": "Version Conflicts",
+            "type": "array"
+          },
+          "vulnerability_data": {
+            "title": "Vulnerability Data",
+            "type": "string"
+          }
+        },
+        "required": [
+          "total",
+          "unique_packages",
+          "production",
+          "development",
+          "other",
+          "unconstrained",
+          "external_sources",
+          "dependencies",
+          "dependencies_truncated",
+          "manifests",
+          "manifests_not_analyzed",
+          "lockfiles",
+          "ecosystems",
+          "version_conflicts",
+          "vulnerability_data",
+          "notes"
+        ],
+        "title": "DependencyAnalysis",
+        "type": "object"
+      },
+      "Detection": {
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "evidence": {
+            "title": "Evidence",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "category",
+          "evidence"
+        ],
+        "title": "Detection",
+        "type": "object"
+      },
+      "DirectoryInfo": {
+        "properties": {
+          "doc_files": {
+            "default": 0,
+            "title": "Doc Files",
+            "type": "integer"
+          },
+          "files": {
+            "title": "Files",
+            "type": "integer"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "site_generator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site Generator"
+          }
+        },
+        "required": [
+          "path",
+          "files"
+        ],
+        "title": "DirectoryInfo",
+        "type": "object"
+      },
+      "DirectoryStat": {
+        "properties": {
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "files": {
+            "title": "Files",
+            "type": "integer"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "files",
+          "bytes"
+        ],
+        "title": "DirectoryStat",
+        "type": "object"
+      },
+      "DocstringCoverage": {
+        "properties": {
+          "documented": {
+            "title": "Documented",
+            "type": "integer"
+          },
+          "files_analyzed": {
+            "title": "Files Analyzed",
+            "type": "integer"
+          },
+          "percent": {
+            "title": "Percent",
+            "type": "number"
+          },
+          "public_definitions": {
+            "title": "Public Definitions",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "public_definitions",
+          "documented",
+          "percent",
+          "files_analyzed"
+        ],
+        "title": "DocstringCoverage",
+        "type": "object"
+      },
+      "DocumentationAnalysis": {
+        "properties": {
+          "comment_density": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment Density"
+          },
+          "docs_directory": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DirectoryInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "examples_directory": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DirectoryInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/PresenceCheck"
+            },
+            "title": "Files",
+            "type": "array"
+          },
+          "license_file": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "License File"
+          },
+          "license_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "License Name"
+          },
+          "license_spdx": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "License Spdx"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "python_docstrings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DocstringCoverage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "readme": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReadmeInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "readme",
+          "files",
+          "license_spdx",
+          "license_name",
+          "license_file",
+          "docs_directory",
+          "examples_directory",
+          "comment_density",
+          "python_docstrings",
+          "notes"
+        ],
+        "title": "DocumentationAnalysis",
+        "type": "object"
+      },
+      "EcosystemSummary": {
+        "properties": {
+          "dependencies": {
+            "title": "Dependencies",
+            "type": "integer"
+          },
+          "development": {
+            "title": "Development",
+            "type": "integer"
+          },
+          "ecosystem": {
+            "title": "Ecosystem",
+            "type": "string"
+          },
+          "has_lockfile": {
+            "title": "Has Lockfile",
+            "type": "boolean"
+          },
+          "production": {
+            "title": "Production",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ecosystem",
+          "dependencies",
+          "production",
+          "development",
+          "has_lockfile"
+        ],
+        "title": "EcosystemSummary",
+        "type": "object"
+      },
+      "EntryPoint": {
+        "properties": {
+          "evidence": {
+            "title": "Evidence",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "kind",
+          "evidence"
+        ],
+        "title": "EntryPoint",
+        "type": "object"
+      },
+      "ExtensionStat": {
+        "properties": {
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "extension": {
+            "title": "Extension",
+            "type": "string"
+          },
+          "files": {
+            "title": "Files",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "extension",
+          "files",
+          "bytes"
+        ],
+        "title": "ExtensionStat",
+        "type": "object"
+      },
+      "FetchSummary": {
+        "properties": {
+          "budget_exhausted": {
+            "title": "Budget Exhausted",
+            "type": "boolean"
+          },
+          "bytes_downloaded": {
+            "title": "Bytes Downloaded",
+            "type": "integer"
+          },
+          "failed": {
+            "title": "Failed",
+            "type": "integer"
+          },
+          "files_downloaded": {
+            "title": "Files Downloaded",
+            "type": "integer"
+          },
+          "files_selected": {
+            "title": "Files Selected",
+            "type": "integer"
+          },
+          "raw_rate_limited": {
+            "title": "Raw Rate Limited",
+            "type": "boolean"
+          },
+          "skipped_binary": {
+            "title": "Skipped Binary",
+            "type": "integer"
+          },
+          "skipped_too_large": {
+            "title": "Skipped Too Large",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "files_selected",
+          "files_downloaded",
+          "bytes_downloaded",
+          "skipped_binary",
+          "skipped_too_large",
+          "failed",
+          "budget_exhausted",
+          "raw_rate_limited"
+        ],
+        "title": "FetchSummary",
+        "type": "object"
+      },
+      "FileHub": {
+        "properties": {
+          "imported_by": {
+            "title": "Imported By",
+            "type": "integer"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "imported_by"
+        ],
+        "title": "FileHub",
+        "type": "object"
+      },
+      "FileStat": {
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "size": {
+            "title": "Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "size",
+          "category"
+        ],
+        "title": "FileStat",
+        "type": "object"
+      },
+      "GitHubLanguageShare": {
+        "description": "Byte counts from GitHub's linguist-based /languages endpoint.",
+        "properties": {
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "percent": {
+            "title": "Percent",
+            "type": "number"
+          }
+        },
+        "required": [
+          "language",
+          "bytes",
+          "percent"
+        ],
+        "title": "GitHubLanguageShare",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HealthCheck": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "max_points": {
+            "title": "Max Points",
+            "type": "number"
+          },
+          "passed": {
+            "title": "Passed",
+            "type": "boolean"
+          },
+          "points": {
+            "title": "Points",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "points",
+          "max_points",
+          "passed",
+          "detail"
+        ],
+        "title": "HealthCheck",
+        "type": "object"
+      },
+      "HealthDimension": {
+        "properties": {
+          "applicable": {
+            "title": "Applicable",
+            "type": "boolean"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/HealthCheck"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "score",
+          "applicable",
+          "checks",
+          "summary"
+        ],
+        "title": "HealthDimension",
+        "type": "object"
+      },
+      "HealthReport": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/HealthDimension"
+            },
+            "title": "Dimensions",
+            "type": "array"
+          },
+          "methodology": {
+            "title": "Methodology",
+            "type": "string"
+          },
+          "overall": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall"
+          }
+        },
+        "required": [
+          "overall",
+          "dimensions",
+          "methodology"
+        ],
+        "title": "HealthReport",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "properties": {
+          "ai_enabled": {
+            "title": "Ai Enabled",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "version",
+          "ai_enabled"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "HygieneCheck": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "passed": {
+            "title": "Passed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "passed",
+          "detail"
+        ],
+        "title": "HygieneCheck",
+        "type": "object"
+      },
+      "ImportResolution": {
+        "properties": {
+          "external": {
+            "title": "External",
+            "type": "integer"
+          },
+          "files_parsed": {
+            "title": "Files Parsed",
+            "type": "integer"
+          },
+          "imports_found": {
+            "title": "Imports Found",
+            "type": "integer"
+          },
+          "internal_resolved": {
+            "title": "Internal Resolved",
+            "type": "integer"
+          },
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Languages",
+            "type": "array"
+          },
+          "unresolved": {
+            "title": "Unresolved",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "files_parsed",
+          "imports_found",
+          "internal_resolved",
+          "external",
+          "unresolved",
+          "languages"
+        ],
+        "title": "ImportResolution",
+        "type": "object"
+      },
+      "InfraItem": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "path",
+          "detail"
+        ],
+        "title": "InfraItem",
+        "type": "object"
+      },
+      "LanguageAnalysis": {
+        "properties": {
+          "counted_lines": {
+            "title": "Counted Lines",
+            "type": "integer"
+          },
+          "estimated_lines": {
+            "title": "Estimated Lines",
+            "type": "integer"
+          },
+          "extensions": {
+            "items": {
+              "$ref": "#/components/schemas/ExtensionStat"
+            },
+            "title": "Extensions",
+            "type": "array"
+          },
+          "github_breakdown": {
+            "items": {
+              "$ref": "#/components/schemas/GitHubLanguageShare"
+            },
+            "title": "Github Breakdown",
+            "type": "array"
+          },
+          "languages": {
+            "items": {
+              "$ref": "#/components/schemas/LanguageStat"
+            },
+            "title": "Languages",
+            "type": "array"
+          },
+          "methodology": {
+            "title": "Methodology",
+            "type": "string"
+          },
+          "primary_language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Language"
+          },
+          "sampled_files": {
+            "title": "Sampled Files",
+            "type": "integer"
+          },
+          "total_lines": {
+            "title": "Total Lines",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "primary_language",
+          "github_breakdown",
+          "languages",
+          "extensions",
+          "total_lines",
+          "counted_lines",
+          "estimated_lines",
+          "sampled_files",
+          "methodology"
+        ],
+        "title": "LanguageAnalysis",
+        "type": "object"
+      },
+      "LanguageStat": {
+        "description": "Per-language statistics computed by RepoLens from the file tree.",
+        "properties": {
+          "blank_lines": {
+            "title": "Blank Lines",
+            "type": "integer"
+          },
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "code_lines": {
+            "title": "Code Lines",
+            "type": "integer"
+          },
+          "comment_lines": {
+            "title": "Comment Lines",
+            "type": "integer"
+          },
+          "files": {
+            "title": "Files",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "programming",
+              "markup",
+              "data",
+              "prose"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "lines": {
+            "title": "Lines",
+            "type": "integer"
+          },
+          "lines_estimated": {
+            "title": "Lines Estimated",
+            "type": "boolean"
+          },
+          "percent_of_bytes": {
+            "title": "Percent Of Bytes",
+            "type": "number"
+          },
+          "sampled_files": {
+            "title": "Sampled Files",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "language",
+          "kind",
+          "files",
+          "bytes",
+          "percent_of_bytes",
+          "lines",
+          "lines_estimated",
+          "sampled_files",
+          "code_lines",
+          "comment_lines",
+          "blank_lines"
+        ],
+        "title": "LanguageStat",
+        "type": "object"
+      },
+      "LongFile": {
+        "properties": {
+          "estimated": {
+            "title": "Estimated",
+            "type": "boolean"
+          },
+          "lines": {
+            "title": "Lines",
+            "type": "integer"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "lines",
+          "estimated"
+        ],
+        "title": "LongFile",
+        "type": "object"
+      },
+      "ManifestSummary": {
+        "properties": {
+          "dependencies": {
+            "title": "Dependencies",
+            "type": "integer"
+          },
+          "ecosystem": {
+            "title": "Ecosystem",
+            "type": "string"
+          },
+          "parse_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parse Error"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "ecosystem",
+          "dependencies"
+        ],
+        "title": "ManifestSummary",
+        "type": "object"
+      },
+      "MarkerItem": {
+        "properties": {
+          "line": {
+            "title": "Line",
+            "type": "integer"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "tag": {
+            "title": "Tag",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "line",
+          "tag",
+          "text"
+        ],
+        "title": "MarkerItem",
+        "type": "object"
+      },
+      "Module": {
+        "properties": {
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "files": {
+            "title": "Files",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Languages",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "role_source": {
+            "title": "Role Source",
+            "type": "string"
+          },
+          "sampled_files": {
+            "title": "Sampled Files",
+            "type": "integer"
+          },
+          "source_files": {
+            "title": "Source Files",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "path",
+          "name",
+          "role",
+          "role_source",
+          "files",
+          "source_files",
+          "bytes",
+          "languages",
+          "sampled_files"
+        ],
+        "title": "Module",
+        "type": "object"
+      },
+      "ModuleEdge": {
+        "properties": {
+          "imports": {
+            "title": "Imports",
+            "type": "integer"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "target": {
+            "title": "Target",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "imports"
+        ],
+        "title": "ModuleEdge",
+        "type": "object"
+      },
+      "PresenceCheck": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Path"
+          },
+          "present": {
+            "title": "Present",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "present"
+        ],
+        "title": "PresenceCheck",
+        "type": "object"
+      },
+      "QualityAnalysis": {
+        "properties": {
+          "average_lines_per_sampled_file": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Lines Per Sampled File"
+          },
+          "average_source_file_bytes": {
+            "title": "Average Source File Bytes",
+            "type": "integer"
+          },
+          "commented_code_files": {
+            "items": {
+              "$ref": "#/components/schemas/CommentedCodeFile"
+            },
+            "title": "Commented Code Files",
+            "type": "array"
+          },
+          "commented_code_lines": {
+            "title": "Commented Code Lines",
+            "type": "integer"
+          },
+          "complexity_hotspots": {
+            "items": {
+              "$ref": "#/components/schemas/ComplexityItem"
+            },
+            "title": "Complexity Hotspots",
+            "type": "array"
+          },
+          "complexity_threshold": {
+            "title": "Complexity Threshold",
+            "type": "integer"
+          },
+          "coverage_note": {
+            "title": "Coverage Note",
+            "type": "string"
+          },
+          "high_complexity_count": {
+            "title": "High Complexity Count",
+            "type": "integer"
+          },
+          "largest_source_files": {
+            "items": {
+              "$ref": "#/components/schemas/LongFile"
+            },
+            "title": "Largest Source Files",
+            "type": "array"
+          },
+          "long_file_count": {
+            "title": "Long File Count",
+            "type": "integer"
+          },
+          "long_file_threshold": {
+            "title": "Long File Threshold",
+            "type": "integer"
+          },
+          "long_files": {
+            "items": {
+              "$ref": "#/components/schemas/LongFile"
+            },
+            "title": "Long Files",
+            "type": "array"
+          },
+          "marker_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Marker Counts",
+            "type": "object"
+          },
+          "markers": {
+            "items": {
+              "$ref": "#/components/schemas/MarkerItem"
+            },
+            "title": "Markers",
+            "type": "array"
+          },
+          "markers_truncated": {
+            "title": "Markers Truncated",
+            "type": "boolean"
+          },
+          "methodology": {
+            "title": "Methodology",
+            "type": "string"
+          },
+          "python_functions_analyzed": {
+            "title": "Python Functions Analyzed",
+            "type": "integer"
+          },
+          "sampled_source_files": {
+            "title": "Sampled Source Files",
+            "type": "integer"
+          },
+          "source_bytes": {
+            "title": "Source Bytes",
+            "type": "integer"
+          },
+          "source_files": {
+            "title": "Source Files",
+            "type": "integer"
+          },
+          "test_files": {
+            "title": "Test Files",
+            "type": "integer"
+          },
+          "test_to_source_ratio": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Test To Source Ratio"
+          },
+          "tooling": {
+            "$ref": "#/components/schemas/Tooling"
+          }
+        },
+        "required": [
+          "source_files",
+          "test_files",
+          "test_to_source_ratio",
+          "source_bytes",
+          "average_source_file_bytes",
+          "sampled_source_files",
+          "average_lines_per_sampled_file",
+          "largest_source_files",
+          "long_file_threshold",
+          "long_files",
+          "long_file_count",
+          "marker_counts",
+          "markers",
+          "markers_truncated",
+          "commented_code_lines",
+          "commented_code_files",
+          "complexity_threshold",
+          "complexity_hotspots",
+          "high_complexity_count",
+          "python_functions_analyzed",
+          "tooling",
+          "coverage_note",
+          "methodology"
+        ],
+        "title": "QualityAnalysis",
+        "type": "object"
+      },
+      "RateLimitInfo": {
+        "properties": {
+          "authenticated": {
+            "default": false,
+            "title": "Authenticated",
+            "type": "boolean"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Limit"
+          },
+          "remaining": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remaining"
+          },
+          "reset_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reset At"
+          }
+        },
+        "title": "RateLimitInfo",
+        "type": "object"
+      },
+      "ReadmeInfo": {
+        "properties": {
+          "badges": {
+            "title": "Badges",
+            "type": "integer"
+          },
+          "broken_relative_links": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Broken Relative Links",
+            "type": "array"
+          },
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "code_blocks": {
+            "title": "Code Blocks",
+            "type": "integer"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "has_table_of_contents": {
+            "title": "Has Table Of Contents",
+            "type": "boolean"
+          },
+          "headings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Headings",
+            "type": "array"
+          },
+          "images": {
+            "title": "Images",
+            "type": "integer"
+          },
+          "lines": {
+            "title": "Lines",
+            "type": "integer"
+          },
+          "links": {
+            "title": "Links",
+            "type": "integer"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "reading_minutes": {
+            "title": "Reading Minutes",
+            "type": "number"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/PresenceCheck"
+            },
+            "title": "Sections",
+            "type": "array"
+          },
+          "words": {
+            "title": "Words",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "format",
+          "bytes",
+          "words",
+          "lines",
+          "reading_minutes",
+          "headings",
+          "sections",
+          "code_blocks",
+          "links",
+          "images",
+          "badges",
+          "has_table_of_contents",
+          "broken_relative_links"
+        ],
+        "title": "ReadmeInfo",
+        "type": "object"
+      },
+      "RepositoryMetadata": {
+        "description": "Repository facts exactly as reported by the GitHub REST API.",
+        "properties": {
+          "archived": {
+            "default": false,
+            "title": "Archived",
+            "type": "boolean"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "default_branch": {
+            "title": "Default Branch",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "disabled": {
+            "default": false,
+            "title": "Disabled",
+            "type": "boolean"
+          },
+          "forks": {
+            "title": "Forks",
+            "type": "integer"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "homepage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Homepage"
+          },
+          "html_url": {
+            "title": "Html Url",
+            "type": "string"
+          },
+          "is_fork": {
+            "default": false,
+            "title": "Is Fork",
+            "type": "boolean"
+          },
+          "is_template": {
+            "default": false,
+            "title": "Is Template",
+            "type": "boolean"
+          },
+          "license_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "License Name"
+          },
+          "license_spdx": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "License Spdx"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "open_issues": {
+            "title": "Open Issues",
+            "type": "integer"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "owner_avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Avatar Url"
+          },
+          "owner_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Type"
+          },
+          "primary_language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Language"
+          },
+          "pushed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pushed At"
+          },
+          "size_kb": {
+            "title": "Size Kb",
+            "type": "integer"
+          },
+          "stars": {
+            "title": "Stars",
+            "type": "integer"
+          },
+          "topics": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Topics",
+            "type": "array"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "watchers": {
+            "title": "Watchers",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "owner",
+          "name",
+          "full_name",
+          "html_url",
+          "default_branch",
+          "stars",
+          "forks",
+          "watchers",
+          "open_issues",
+          "size_kb"
+        ],
+        "title": "RepositoryMetadata",
+        "type": "object"
+      },
+      "SecurityAnalysis": {
+        "properties": {
+          "counts_by_category": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Counts By Category",
+            "type": "object"
+          },
+          "counts_by_severity": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Counts By Severity",
+            "type": "object"
+          },
+          "coverage_note": {
+            "title": "Coverage Note",
+            "type": "string"
+          },
+          "disclaimer": {
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "env_variable_files": {
+            "title": "Env Variable Files",
+            "type": "integer"
+          },
+          "env_variables": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Env Variables",
+            "type": "array"
+          },
+          "files_scanned": {
+            "title": "Files Scanned",
+            "type": "integer"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/SecurityFinding"
+            },
+            "title": "Findings",
+            "type": "array"
+          },
+          "findings_truncated": {
+            "title": "Findings Truncated",
+            "type": "boolean"
+          },
+          "hygiene": {
+            "items": {
+              "$ref": "#/components/schemas/HygieneCheck"
+            },
+            "title": "Hygiene",
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/SecurityRule"
+            },
+            "title": "Rules",
+            "type": "array"
+          }
+        },
+        "required": [
+          "disclaimer",
+          "findings",
+          "findings_truncated",
+          "counts_by_severity",
+          "counts_by_category",
+          "files_scanned",
+          "env_variables",
+          "env_variable_files",
+          "hygiene",
+          "rules",
+          "coverage_note"
+        ],
+        "title": "SecurityAnalysis",
+        "type": "object"
+      },
+      "SecurityFinding": {
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ],
+            "title": "Confidence",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence"
+          },
+          "in_test": {
+            "default": false,
+            "title": "In Test",
+            "type": "boolean"
+          },
+          "line": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "rule": {
+            "title": "Rule",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "high",
+              "medium",
+              "low",
+              "info"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule",
+          "title",
+          "severity",
+          "confidence",
+          "category",
+          "path",
+          "description"
+        ],
+        "title": "SecurityFinding",
+        "type": "object"
+      },
+      "SecurityRule": {
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "high",
+              "medium",
+              "low",
+              "info"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "severity",
+          "category",
+          "description"
+        ],
+        "title": "SecurityRule",
+        "type": "object"
+      },
+      "StructureAnalysis": {
+        "properties": {
+          "analyzed_files": {
+            "title": "Analyzed Files",
+            "type": "integer"
+          },
+          "analyzed_size_bytes": {
+            "title": "Analyzed Size Bytes",
+            "type": "integer"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryStat"
+            },
+            "title": "Categories",
+            "type": "array"
+          },
+          "ignored_directories": {
+            "items": {
+              "$ref": "#/components/schemas/DirectoryStat"
+            },
+            "title": "Ignored Directories",
+            "type": "array"
+          },
+          "ignored_files": {
+            "title": "Ignored Files",
+            "type": "integer"
+          },
+          "ignored_size_bytes": {
+            "title": "Ignored Size Bytes",
+            "type": "integer"
+          },
+          "largest_directories": {
+            "items": {
+              "$ref": "#/components/schemas/DirectoryStat"
+            },
+            "title": "Largest Directories",
+            "type": "array"
+          },
+          "largest_files": {
+            "items": {
+              "$ref": "#/components/schemas/FileStat"
+            },
+            "title": "Largest Files",
+            "type": "array"
+          },
+          "max_depth": {
+            "title": "Max Depth",
+            "type": "integer"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "oversized_files": {
+            "title": "Oversized Files",
+            "type": "integer"
+          },
+          "product_max_depth": {
+            "title": "Product Max Depth",
+            "type": "integer"
+          },
+          "submodules": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Submodules",
+            "type": "array"
+          },
+          "symlinks": {
+            "title": "Symlinks",
+            "type": "integer"
+          },
+          "top_level": {
+            "items": {
+              "$ref": "#/components/schemas/TreeNode"
+            },
+            "title": "Top Level",
+            "type": "array"
+          },
+          "total_directories": {
+            "title": "Total Directories",
+            "type": "integer"
+          },
+          "total_files": {
+            "title": "Total Files",
+            "type": "integer"
+          },
+          "total_size_bytes": {
+            "title": "Total Size Bytes",
+            "type": "integer"
+          },
+          "tree": {
+            "$ref": "#/components/schemas/TreeNode"
+          },
+          "tree_node_budget": {
+            "title": "Tree Node Budget",
+            "type": "integer"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "total_files",
+          "total_directories",
+          "total_size_bytes",
+          "analyzed_files",
+          "analyzed_size_bytes",
+          "ignored_files",
+          "ignored_size_bytes",
+          "ignored_directories",
+          "symlinks",
+          "submodules",
+          "max_depth",
+          "product_max_depth",
+          "oversized_files",
+          "categories",
+          "largest_files",
+          "largest_directories",
+          "top_level",
+          "tree",
+          "tree_node_budget",
+          "truncated",
+          "notes"
+        ],
+        "title": "StructureAnalysis",
+        "type": "object"
+      },
+      "Tooling": {
+        "properties": {
+          "ci": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Ci",
+            "type": "array"
+          },
+          "editorconfig": {
+            "title": "Editorconfig",
+            "type": "boolean"
+          },
+          "formatters": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Formatters",
+            "type": "array"
+          },
+          "linters": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Linters",
+            "type": "array"
+          },
+          "pre_commit": {
+            "title": "Pre Commit",
+            "type": "boolean"
+          },
+          "test_frameworks": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Test Frameworks",
+            "type": "array"
+          },
+          "type_checkers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Type Checkers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ci",
+          "linters",
+          "formatters",
+          "type_checkers",
+          "test_frameworks",
+          "pre_commit",
+          "editorconfig"
+        ],
+        "title": "Tooling",
+        "type": "object"
+      },
+      "TreeNode": {
+        "properties": {
+          "children": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TreeNode"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Children"
+          },
+          "files": {
+            "default": 0,
+            "title": "Files",
+            "type": "integer"
+          },
+          "ignored": {
+            "default": false,
+            "title": "Ignored",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "omitted_children": {
+            "default": 0,
+            "title": "Omitted Children",
+            "type": "integer"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "size": {
+            "default": 0,
+            "title": "Size",
+            "type": "integer"
+          },
+          "type": {
+            "enum": [
+              "dir",
+              "file",
+              "symlink",
+              "submodule"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "path",
+          "type"
+        ],
+        "title": "TreeNode",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "VersionConflict": {
+        "properties": {
+          "ecosystem": {
+            "title": "Ecosystem",
+            "type": "string"
+          },
+          "manifests": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Manifests",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "versions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Versions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "ecosystem",
+          "versions",
+          "manifests"
+        ],
+        "title": "VersionConflict",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Deterministic static analysis of public GitHub repositories.",
+    "title": "RepoLens API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/analyze": {
+      "post": {
+        "description": "Analyze a public repository and return the complete report.",
+        "operationId": "analyze_api_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisReport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Analyze"
+      }
+    },
+    "/api/analyze/stream": {
+      "post": {
+        "description": "Same as /analyze, but streams progress events so clients can show the current stage.\n\nEach line is one JSON object:\n  {\"type\": \"progress\", \"stage\": \"tree\", \"message\": \"...\"}\n  {\"type\": \"result\", \"report\": {...}}\n  {\"type\": \"error\", \"error\": {\"code\": \"...\", \"message\": \"...\", \"details\": {...}}}",
+        "operationId": "analyze_stream_api_analyze_stream_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {}
+            },
+            "description": "Newline-delimited JSON events: progress, then result or error."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Analyze Stream"
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/api/repositories/{owner}/{name}": {
+      "get": {
+        "operationId": "repository_metadata_api_repositories__owner___name__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "owner",
+            "required": true,
+            "schema": {
+              "title": "Owner",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RepositoryMetadata"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Repository Metadata"
+      }
+    }
+  }
+}
