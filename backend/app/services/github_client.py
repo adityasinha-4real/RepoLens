@@ -7,6 +7,7 @@ never see raw httpx exceptions or status codes.
 import logging
 from datetime import UTC, datetime
 from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -20,6 +21,7 @@ from app.core.errors import (
 )
 from app.schemas.repository import RateLimitInfo, RepositoryMetadata
 from app.services.repository_parser import RepoRef
+from app.services.repository_tree import RepositoryTree, build_tree
 
 logger = logging.getLogger(__name__)
 
@@ -138,6 +140,44 @@ class GitHubClient:
             # Only possible with a token that can see private repos; RepoLens analyzes public code.
             raise RepositoryNotFoundError("Only public repositories can be analyzed.")
         return parse_repository_metadata(data)
+
+    async def get_head_commit(self, ref: RepoRef, branch: str) -> tuple[str, datetime | None]:
+        """Resolve a branch to its head commit SHA and commit date.
+
+        Pinning every later request to this SHA keeps the analysis consistent even if
+        someone pushes while it runs."""
+        data = await self._get_json(
+            f"/repos/{ref.owner}/{ref.name}/commits/{quote(branch, safe='/')}", context="branch"
+        )
+        try:
+            sha = data["sha"]
+            date_raw = data.get("commit", {}).get("committer", {}).get("date")
+        except (KeyError, TypeError, AttributeError) as exc:
+            raise UpstreamError("GitHub returned a malformed commit response.") from exc
+        if not isinstance(sha, str) or not sha.isalnum():
+            raise UpstreamError("GitHub returned an invalid commit SHA.")
+        date = None
+        if isinstance(date_raw, str):
+            try:
+                date = datetime.fromisoformat(date_raw.replace("Z", "+00:00"))
+            except ValueError:
+                date = None
+        return sha, date
+
+    async def get_tree(self, ref: RepoRef, commit_sha: str) -> RepositoryTree:
+        data = await self._get_json(
+            f"/repos/{ref.owner}/{ref.name}/git/trees/{commit_sha}",
+            params={"recursive": "1"},
+            context="repository tree",
+        )
+        if not isinstance(data, dict) or not isinstance(data.get("tree"), list):
+            raise UpstreamError("GitHub returned a malformed tree response.")
+        return build_tree(
+            commit_sha,
+            data["tree"],
+            github_truncated=bool(data.get("truncated")),
+            max_entries=self._settings.max_tree_entries,
+        )
 
 
 def _error_message(response: httpx.Response) -> str:

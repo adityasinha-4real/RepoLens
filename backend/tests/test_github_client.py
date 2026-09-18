@@ -152,3 +152,34 @@ async def test_renamed_repository_redirect_is_followed(settings: Settings) -> No
 
     meta = await client_for(handler, settings).get_repository(RepoRef("octo", "old-name"))
     assert meta.name == "demo"
+
+
+async def test_head_commit_and_tree_are_fetched_and_sanitized(settings: Settings) -> None:
+    fake = FakeGitHub(files={"src/main.py": "print('hi')\n", "README.md": "# Demo\n"})
+    gh = client_for(fake.handle, settings)
+    sha, date = await gh.get_head_commit(REF, "main")
+    assert sha == "abc123" and date is not None
+    tree = await gh.get_tree(REF, sha)
+    assert {e.path for e in tree.files()} == {"src/main.py", "README.md"}
+    assert tree.commit_sha == "abc123"
+    tree_request = fake.requests[-1]
+    assert tree_request.url.path.endswith("/git/trees/abc123")
+    assert tree_request.url.params["recursive"] == "1"
+
+
+async def test_truncated_tree_is_flagged(settings: Settings) -> None:
+    fake = FakeGitHub(files={"a.py": "x"}, tree_truncated=True)
+    tree = await client_for(fake.handle, settings).get_tree(REF, "abc123")
+    assert tree.truncated_by_github and tree.notes
+
+
+async def test_empty_repository_maps_to_unavailable(settings: Settings) -> None:
+    gh = client_for(lambda r: json_response({"message": "Git Repository is empty."}, 409), settings)
+    with pytest.raises(RepositoryUnavailableError, match="empty"):
+        await gh.get_head_commit(REF, "main")
+
+
+async def test_invalid_commit_sha_is_rejected(settings: Settings) -> None:
+    gh = client_for(lambda r: json_response({"sha": "../../etc"}), settings)
+    with pytest.raises(UpstreamError):
+        await gh.get_head_commit(REF, "main")
