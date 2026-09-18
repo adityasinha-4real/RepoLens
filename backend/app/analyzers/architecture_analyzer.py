@@ -326,14 +326,9 @@ def workspace_globs(contents: dict[str, str]) -> list[str]:
 
 
 def _choose_module_paths(paths: list[str], packages: list[str]) -> list[str]:
-    if len(packages) >= 2:
-        # Packages plus every top-level directory: longest-prefix matching routes package
-        # files to their package and everything else to its top-level directory.
-        chosen = set(packages) | {p.split("/", 1)[0] for p in paths if "/" in p}
-        return sorted(chosen)
-
     # Source files below every directory, and the directory tree itself.
     source_below: Counter[str] = Counter()
+    direct_source: Counter[str] = Counter()
     children: dict[str, set[str]] = defaultdict(set)
     direct_files: Counter[str] = Counter()
     for p in paths:
@@ -341,7 +336,9 @@ def _choose_module_paths(paths: list[str], packages: list[str]) -> list[str]:
         # Only production source decides where the code "lives"; large test suites would
         # otherwise dilute the share of the real source directory.
         is_source = classify(p).category == FileCategory.SOURCE
-        direct_files["/".join(parts[:-1])] += 1
+        parent_dir = "/".join(parts[:-1])
+        direct_files[parent_dir] += 1
+        direct_source[parent_dir] += is_source
         for i in range(1, len(parts)):
             parent, child = "/".join(parts[: i - 1]), "/".join(parts[:i])
             children[parent].add(child)
@@ -350,18 +347,28 @@ def _choose_module_paths(paths: list[str], packages: list[str]) -> list[str]:
     total_source = sum(source_below[c] for c in children[""]) or 1
 
     def expand(directory: str, depth: int) -> list[str]:
+        """Split a directory into its sub-modules. A directory whose code lives in exactly one
+        child (e.g. src/<package>/, backend/app/) is descended into; siblings such as tests/
+        stay separate modules."""
         subdirs = sorted(children.get(directory, ()))
         with_source = [d for d in subdirs if source_below[d] > 0]
-        if (
-            depth < 3
-            and len(with_source) == 1
-            and direct_files[directory] == 0
-            and len(subdirs) == 1
-        ):
-            return expand(with_source[0], depth + 1)  # e.g. src/<package>/...
+        own = [directory] if direct_files[directory] else []
+        if depth < 3 and len(with_source) == 1 and direct_source[directory] == 0:
+            siblings = [d for d in subdirs if d != with_source[0]]
+            return siblings + expand(with_source[0], depth + 1) + own
         if depth < 3 and len(with_source) >= 2:
-            return subdirs + ([directory] if direct_files[directory] else [])
+            return subdirs + own
         return [directory]
+
+    if len(packages) >= 2:
+        # Packages plus every top-level directory: longest-prefix matching routes package
+        # files to their package and everything else to its top-level directory. Packages
+        # that hold a large share of the code are split further.
+        chosen = set(packages) | {p.split("/", 1)[0] for p in paths if "/" in p}
+        for package in packages:
+            if source_below[package] / total_source >= 0.25:
+                chosen |= set(expand(package, 0))
+        return sorted(chosen)
 
     modules: list[str] = []
     for top in sorted(children[""]):

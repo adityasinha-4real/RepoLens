@@ -199,6 +199,16 @@ def detect_tooling(
     lower_names = {n.lower() for n in names}
     deps = {d.lower() for d in dependency_names}
     pyproject = "\n".join(t for p, t in contents.items() if p.endswith("pyproject.toml"))
+    # Commands run in CI / pre-commit / Makefiles reveal tools enforced without a config file.
+    automation_files = (".pre-commit-config.yaml", "Makefile", "justfile", "package.json")
+    automation = "\n".join(
+        t
+        for p, t in contents.items()
+        if p.startswith(".github/workflows/") or PurePosixPath(p).name in automation_files
+    ).lower()
+
+    def runs(*commands: str) -> bool:
+        return any(c in automation for c in commands)
 
     def has(*candidates: str) -> bool:
         return any(c.lower() in lower_names for c in candidates)
@@ -246,11 +256,17 @@ def detect_tooling(
             ("markdownlint", has_prefix(".markdownlint")),
         ],
         "formatters": [
-            ("Prettier", has_prefix(".prettierrc", "prettier.config") or "prettier" in deps),
-            ("Black", tool("black") or "black" in deps),
+            (
+                "Prettier",
+                has_prefix(".prettierrc", "prettier.config")
+                or "prettier" in deps
+                or runs("prettier --check", "prettier --write"),
+            ),
+            ("Black", tool("black") or "black" in deps or runs("black --check", "black .")),
             ("isort", tool("isort") or has(".isort.cfg") or "isort" in deps),
-            ("Ruff formatter", tool("ruff.format")),
-            ("rustfmt", has("rustfmt.toml", ".rustfmt.toml")),
+            ("Ruff formatter", tool("ruff.format") or runs("ruff format", "ruff-format")),
+            ("rustfmt", has("rustfmt.toml", ".rustfmt.toml") or runs("cargo fmt")),
+            ("gofmt", runs("gofmt", "go fmt", "goimports")),
             ("clang-format", has(".clang-format")),
             ("Biome", has("biome.json", "biome.jsonc")),
             ("dprint", has("dprint.json", ".dprint.json")),

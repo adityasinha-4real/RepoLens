@@ -267,3 +267,31 @@ def test_python_imports_only_resolve_at_plausible_sys_path_roots() -> None:
     assert ("src/flask/app.py", "src/flask/helpers.py") in edges
     assert not any(dst == "tests/apps/inner/flask.py" for _, dst in edges)
     assert not any(src == "scripts/run.py" for src, _ in edges)
+
+
+def test_large_workspace_packages_are_split_into_submodules() -> None:
+    files = {
+        "backend/pyproject.toml": "[project]\nname='b'\n",
+        "backend/app/main.py": "from app.api import routes\n",
+        "backend/app/api/routes.py": "from app.services import users\n",
+        "backend/app/services/users.py": "",
+        "backend/tests/test_users.py": "from app.services import users\n",
+        "frontend/package.json": '{"name": "web"}',
+        "frontend/app/page.tsx": "import { x } from '../lib/x'\n",
+        "frontend/lib/x.ts": "export const x = 1",
+        "frontend/components/button.tsx": "",
+    }
+    tree = RepositoryTree("sha", [TreeEntry(p, "file", len(t)) for p, t in files.items()])
+    arch = analyze_architecture(tree, files, [])
+    ids = {m.id for m in arch.modules}
+    assert {
+        "backend/app/api",
+        "backend/app/services",
+        "backend/tests",
+        "frontend/app",
+        "frontend/lib",
+    } <= ids
+    edges = {(e.source, e.target) for e in arch.edges}
+    assert ("backend/app/api", "backend/app/services") in edges
+    assert ("backend/tests", "backend/app/services") in edges
+    assert ("frontend/app", "frontend/lib") in edges

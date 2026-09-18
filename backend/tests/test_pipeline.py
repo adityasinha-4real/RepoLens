@@ -24,17 +24,17 @@ REPO_FILES: dict[str, str] = {
     ".gitignore": "__pycache__/\n.env\n",
     "pyproject.toml": '[project]\nname = "demo"\ndependencies = ["fastapi>=0.115", '
     '"httpx==0.27.0"]\n[project.optional-dependencies]\ndev = ["pytest>=8"]\n'
-    '[project.scripts]\ndemo = "demo.cli:main"\n[tool.ruff]\nline-length = 100\n',
-    "demo/__init__.py": "",
-    "demo/api/__init__.py": "",
-    "demo/api/routes.py": "from demo.services.users import get_user\n\n\ndef list_users():\n"
+    '[project.scripts]\nshop = "shop.cli:main"\n[tool.ruff]\nline-length = 100\n',
+    "shop/__init__.py": "",
+    "shop/api/__init__.py": "",
+    "shop/api/routes.py": "from shop.services.users import get_user\n\n\ndef list_users():\n"
     "    # TODO: paginate\n    return [get_user(1)]\n",
-    "demo/services/__init__.py": "",
-    "demo/services/users.py": 'import os\n\nDB = os.getenv("DATABASE_URL")\n\n\ndef get_user(i):\n'
+    "shop/services/__init__.py": "",
+    "shop/services/users.py": 'import os\n\nDB = os.getenv("DATABASE_URL")\n\n\ndef get_user(i):\n'
     '    """Return a user."""\n    return {"id": i}\n',
-    "demo/cli.py": "from demo.api.routes import list_users\n\n\ndef main():\n"
+    "shop/cli.py": "from shop.api.routes import list_users\n\n\ndef main():\n"
     "    print(list_users())\n\n\nif __name__ == '__main__':\n    main()\n",
-    "tests/test_users.py": "from demo.services.users import get_user\n\n\ndef test_get_user():\n"
+    "tests/test_users.py": "from shop.services.users import get_user\n\n\ndef test_get_user():\n"
     "    assert get_user(1)['id'] == 1\n",
     "docs/index.md": "# Docs\n",
     ".github/workflows/ci.yml": "on: [push]\njobs:\n  test:\n    runs-on: ubuntu-latest\n"
@@ -79,8 +79,8 @@ def test_full_pipeline_via_api() -> None:
     arch = report.architecture
     assert "FastAPI" in {f.name for f in arch.frameworks}
     edges = {(e.source, e.target) for e in arch.edges}
-    assert ("demo/api", "demo/services") in edges
-    assert ("tests", "demo/services") in edges
+    assert ("shop/api", "shop/services") in edges
+    assert ("tests", "shop/services") in edges
     assert any(e.kind == "CLI command" for e in arch.entry_points)
 
     dims = {d.key: d for d in report.health.dimensions}

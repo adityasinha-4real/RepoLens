@@ -6,7 +6,7 @@ from typing import Annotated
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
-APP_VERSION = "0.1.0"
+APP_VERSION = "1.0.0"
 
 
 class Settings(BaseSettings):

@@ -3,7 +3,7 @@
   "analyzed_at": "2026-09-18T00:00:00+00:00",
   "commit_sha": "abc123",
   "duration_ms": 1234,
-  "engine_version": "0.1.0",
+  "engine_version": "1.0.0",
   "fetch": {
    "budget_exhausted": false,
    "bytes_downloaded": 919,
@@ -36,30 +36,35 @@
   "edges": [
    {
     "imports": 1,
-    "source": "demo",
-    "target": "demo/api"
+    "source": "shop",
+    "target": "shop/api"
    },
    {
     "imports": 1,
-    "source": "demo/api",
-    "target": "demo/services"
+    "source": "shop/api",
+    "target": "shop/services"
    },
    {
     "imports": 1,
     "source": "tests",
-    "target": "demo/services"
+    "target": "shop/services"
    }
   ],
   "entry_points": [
    {
-    "evidence": "pyproject.toml script 'demo'",
+    "evidence": "pyproject.toml script 'shop'",
     "kind": "CLI command",
-    "path": "demo.cli:main"
+    "path": "shop.cli:main"
    },
    {
     "evidence": "[\"demo\"]",
     "kind": "Container command",
     "path": "Dockerfile:CMD"
+   },
+   {
+    "evidence": "if __name__ == \"__main__\"",
+    "kind": "Python script",
+    "path": "shop/cli.py"
    }
   ],
   "frameworks": [
@@ -72,11 +77,11 @@
   "hubs": [
    {
     "imported_by": 2,
-    "path": "demo/services/users.py"
+    "path": "shop/services/users.py"
    },
    {
     "imported_by": 1,
-    "path": "demo/api/routes.py"
+    "path": "shop/api/routes.py"
    }
   ],
   "import_resolution": {
@@ -123,48 +128,6 @@
     "source_files": 0
    },
    {
-    "bytes": 117,
-    "files": 2,
-    "id": "demo",
-    "languages": [
-     "Python"
-    ],
-    "name": "demo",
-    "path": "demo",
-    "role": "Documentation / examples",
-    "role_source": "directory-name",
-    "sampled_files": 1,
-    "source_files": 2
-   },
-   {
-    "bytes": 107,
-    "files": 2,
-    "id": "demo/api",
-    "languages": [
-     "Python"
-    ],
-    "name": "api",
-    "path": "demo/api",
-    "role": "API / routing",
-    "role_source": "directory-name",
-    "sampled_files": 1,
-    "source_files": 2
-   },
-   {
-    "bytes": 107,
-    "files": 2,
-    "id": "demo/services",
-    "languages": [
-     "Python"
-    ],
-    "name": "services",
-    "path": "demo/services",
-    "role": "Core / services",
-    "role_source": "directory-name",
-    "sampled_files": 1,
-    "source_files": 2
-   },
-   {
     "bytes": 7,
     "files": 1,
     "id": "docs",
@@ -175,6 +138,48 @@
     "role_source": "directory-name",
     "sampled_files": 0,
     "source_files": 0
+   },
+   {
+    "bytes": 117,
+    "files": 2,
+    "id": "shop",
+    "languages": [
+     "Python"
+    ],
+    "name": "shop",
+    "path": "shop",
+    "role": "Module",
+    "role_source": "unknown",
+    "sampled_files": 1,
+    "source_files": 2
+   },
+   {
+    "bytes": 107,
+    "files": 2,
+    "id": "shop/api",
+    "languages": [
+     "Python"
+    ],
+    "name": "api",
+    "path": "shop/api",
+    "role": "API / routing",
+    "role_source": "directory-name",
+    "sampled_files": 1,
+    "source_files": 2
+   },
+   {
+    "bytes": 107,
+    "files": 2,
+    "id": "shop/services",
+    "languages": [
+     "Python"
+    ],
+    "name": "services",
+    "path": "shop/services",
+    "role": "Core / services",
+    "role_source": "directory-name",
+    "sampled_files": 1,
+    "source_files": 2
    },
    {
     "bytes": 98,
@@ -274,12 +279,7 @@
    "path": "docs",
    "site_generator": null
   },
-  "examples_directory": {
-   "doc_files": 0,
-   "files": 6,
-   "path": "demo",
-   "site_generator": null
-  },
+  "examples_directory": null,
   "files": [
    {
     "key": "contributing",
@@ -780,7 +780,7 @@
       "points": 10.0
      },
      {
-      "detail": "demo.cli:main",
+      "detail": "shop.cli:main",
       "id": "structure.entry_point",
       "label": "Entry point identifiable",
       "max_points": 10.0,
@@ -924,32 +924,32 @@
    {
     "estimated": false,
     "lines": 10,
-    "path": "demo/cli.py"
+    "path": "shop/cli.py"
    },
    {
     "estimated": false,
     "lines": 7,
-    "path": "demo/api/routes.py"
+    "path": "shop/api/routes.py"
    },
    {
     "estimated": false,
     "lines": 9,
-    "path": "demo/services/users.py"
+    "path": "shop/services/users.py"
    },
    {
     "estimated": true,
     "lines": 0,
-    "path": "demo/__init__.py"
+    "path": "shop/__init__.py"
    },
    {
     "estimated": true,
     "lines": 0,
-    "path": "demo/api/__init__.py"
+    "path": "shop/api/__init__.py"
    },
    {
     "estimated": true,
     "lines": 0,
-    "path": "demo/services/__init__.py"
+    "path": "shop/services/__init__.py"
    }
   ],
   "long_file_count": 0,
@@ -964,7 +964,7 @@
   "markers": [
    {
     "line": 5,
-    "path": "demo/api/routes.py",
+    "path": "shop/api/routes.py",
     "tag": "TODO",
     "text": "TODO: paginate"
    }
@@ -1365,17 +1365,17 @@
    {
     "bytes": 331,
     "files": 6,
-    "path": "demo"
+    "path": "shop"
    },
    {
     "bytes": 107,
     "files": 2,
-    "path": "demo/api"
+    "path": "shop/api"
    },
    {
     "bytes": 107,
     "files": 2,
-    "path": "demo/services"
+    "path": "shop/services"
    },
    {
     "bytes": 98,
@@ -1414,19 +1414,19 @@
    {
     "category": "source",
     "language": "Python",
-    "path": "demo/cli.py",
+    "path": "shop/cli.py",
     "size": 117
    },
    {
     "category": "source",
     "language": "Python",
-    "path": "demo/api/routes.py",
+    "path": "shop/api/routes.py",
     "size": 107
    },
    {
     "category": "source",
     "language": "Python",
-    "path": "demo/services/users.py",
+    "path": "shop/services/users.py",
     "size": 107
    },
    {
@@ -1474,19 +1474,19 @@
    {
     "category": "source",
     "language": "Python",
-    "path": "demo/__init__.py",
+    "path": "shop/__init__.py",
     "size": 0
    },
    {
     "category": "source",
     "language": "Python",
-    "path": "demo/api/__init__.py",
+    "path": "shop/api/__init__.py",
     "size": 0
    },
    {
     "category": "source",
     "language": "Python",
-    "path": "demo/services/__init__.py",
+    "path": "shop/services/__init__.py",
     "size": 0
    }
   ],
@@ -1509,16 +1509,6 @@
    },
    {
     "children": null,
-    "files": 6,
-    "ignored": false,
-    "name": "demo",
-    "omitted_children": 0,
-    "path": "demo",
-    "size": 331,
-    "type": "dir"
-   },
-   {
-    "children": null,
     "files": 1,
     "ignored": false,
     "name": "docs",
@@ -1535,6 +1525,16 @@
     "omitted_children": 0,
     "path": "node_modules",
     "size": 19,
+    "type": "dir"
+   },
+   {
+    "children": null,
+    "files": 6,
+    "ignored": false,
+    "name": "shop",
+    "omitted_children": 0,
+    "path": "shop",
+    "size": 331,
     "type": "dir"
    },
    {
@@ -1648,99 +1648,6 @@
     {
      "children": [
       {
-       "children": [
-        {
-         "children": null,
-         "files": 0,
-         "ignored": false,
-         "name": "__init__.py",
-         "omitted_children": 0,
-         "path": "demo/api/__init__.py",
-         "size": 0,
-         "type": "file"
-        },
-        {
-         "children": null,
-         "files": 0,
-         "ignored": false,
-         "name": "routes.py",
-         "omitted_children": 0,
-         "path": "demo/api/routes.py",
-         "size": 107,
-         "type": "file"
-        }
-       ],
-       "files": 2,
-       "ignored": false,
-       "name": "api",
-       "omitted_children": 0,
-       "path": "demo/api",
-       "size": 107,
-       "type": "dir"
-      },
-      {
-       "children": [
-        {
-         "children": null,
-         "files": 0,
-         "ignored": false,
-         "name": "__init__.py",
-         "omitted_children": 0,
-         "path": "demo/services/__init__.py",
-         "size": 0,
-         "type": "file"
-        },
-        {
-         "children": null,
-         "files": 0,
-         "ignored": false,
-         "name": "users.py",
-         "omitted_children": 0,
-         "path": "demo/services/users.py",
-         "size": 107,
-         "type": "file"
-        }
-       ],
-       "files": 2,
-       "ignored": false,
-       "name": "services",
-       "omitted_children": 0,
-       "path": "demo/services",
-       "size": 107,
-       "type": "dir"
-      },
-      {
-       "children": null,
-       "files": 0,
-       "ignored": false,
-       "name": "__init__.py",
-       "omitted_children": 0,
-       "path": "demo/__init__.py",
-       "size": 0,
-       "type": "file"
-      },
-      {
-       "children": null,
-       "files": 0,
-       "ignored": false,
-       "name": "cli.py",
-       "omitted_children": 0,
-       "path": "demo/cli.py",
-       "size": 117,
-       "type": "file"
-      }
-     ],
-     "files": 6,
-     "ignored": false,
-     "name": "demo",
-     "omitted_children": 0,
-     "path": "demo",
-     "size": 331,
-     "type": "dir"
-    },
-    {
-     "children": [
-      {
        "children": null,
        "files": 0,
        "ignored": false,
@@ -1767,6 +1674,99 @@
      "omitted_children": 0,
      "path": "node_modules",
      "size": 19,
+     "type": "dir"
+    },
+    {
+     "children": [
+      {
+       "children": [
+        {
+         "children": null,
+         "files": 0,
+         "ignored": false,
+         "name": "__init__.py",
+         "omitted_children": 0,
+         "path": "shop/api/__init__.py",
+         "size": 0,
+         "type": "file"
+        },
+        {
+         "children": null,
+         "files": 0,
+         "ignored": false,
+         "name": "routes.py",
+         "omitted_children": 0,
+         "path": "shop/api/routes.py",
+         "size": 107,
+         "type": "file"
+        }
+       ],
+       "files": 2,
+       "ignored": false,
+       "name": "api",
+       "omitted_children": 0,
+       "path": "shop/api",
+       "size": 107,
+       "type": "dir"
+      },
+      {
+       "children": [
+        {
+         "children": null,
+         "files": 0,
+         "ignored": false,
+         "name": "__init__.py",
+         "omitted_children": 0,
+         "path": "shop/services/__init__.py",
+         "size": 0,
+         "type": "file"
+        },
+        {
+         "children": null,
+         "files": 0,
+         "ignored": false,
+         "name": "users.py",
+         "omitted_children": 0,
+         "path": "shop/services/users.py",
+         "size": 107,
+         "type": "file"
+        }
+       ],
+       "files": 2,
+       "ignored": false,
+       "name": "services",
+       "omitted_children": 0,
+       "path": "shop/services",
+       "size": 107,
+       "type": "dir"
+      },
+      {
+       "children": null,
+       "files": 0,
+       "ignored": false,
+       "name": "__init__.py",
+       "omitted_children": 0,
+       "path": "shop/__init__.py",
+       "size": 0,
+       "type": "file"
+      },
+      {
+       "children": null,
+       "files": 0,
+       "ignored": false,
+       "name": "cli.py",
+       "omitted_children": 0,
+       "path": "shop/cli.py",
+       "size": 117,
+       "type": "file"
+      }
+     ],
+     "files": 6,
+     "ignored": false,
+     "name": "shop",
+     "omitted_children": 0,
+     "path": "shop",
+     "size": 331,
      "type": "dir"
     },
     {

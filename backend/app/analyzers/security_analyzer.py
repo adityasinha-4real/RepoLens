@@ -193,8 +193,17 @@ def _connection_string_severity(m: re.Match[str]) -> Severity | None:
 
 
 INSECURE_HTTP_RE = _r(r"\bhttp://(?P<host>[A-Za-z0-9.-]+)(?::\d+)?[^\s'\"<>)]*")
+_LITERAL_OR_COMMENT_RE = _r(
+    r"\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`|(?:^|\s)(?:#|//).*$"
+)
+
+
+def _strip_literals(line: str) -> str:
+    return _LITERAL_OR_COMMENT_RE.sub(" ", line)
+
+
 _SAFE_HTTP_HOSTS = _r(
-    r"^(?:localhost|127\.\d+\.\d+\.\d+|0\.0\.0\.0|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|"
+    r"^(?:[A-Za-z0-9-]+|localhost|127\.\d+\.\d+\.\d+|0\.0\.0\.0|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|"
     r"172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+|[\w.-]*\.(?:local|localhost|test|example|invalid|"
     r"internal)|(?:www\.)?example\.(?:com|org|net)|[\w.-]*w3\.org|[\w.-]*xmlsoap\.org|"
     r"schemas\.[\w.-]+|purl\.org|json-schema\.org|[\w.-]*apache\.org|xml\.org|ns\.adobe\.com|"
@@ -380,8 +389,11 @@ def scan_file(path: str, text: str) -> list[SecurityFinding]:
                     _snippet(line),
                     f"A value that looks like a credential is assigned to '{m.group('key')}'.",
                 )
+        code_line = _strip_literals(line) if code_rules else line
         for rule in code_rules:
-            if rule.pattern.search(line):
+            # Language-scoped rules look for calls, so string literals and comments (which
+            # merely mention e.g. "eval()") are ignored.
+            if rule.pattern.search(code_line if rule.languages is not None else line):
                 add(
                     rule.id,
                     rule.title,
@@ -650,7 +662,10 @@ def analyze_security(
             continue
         scanned += 1
         findings.extend(scan_file(path, text))
-        if cls.category in (FileCategory.SOURCE, FileCategory.CONFIG, FileCategory.TEST):
+        # The inventory reflects the product: tests, examples and fixtures use throwaway names.
+        if cls.category in (FileCategory.SOURCE, FileCategory.CONFIG) and not (
+            is_test_path(path) or is_auxiliary_path(path)
+        ):
             names = {next(g for g in m.groups() if g) for m in ENV_USAGE_RE.finditer(text)}
             if names:
                 env_files += 1

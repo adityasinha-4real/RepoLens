@@ -35,11 +35,11 @@ describe("Dashboard", () => {
     expect(within(tree).getByText("node_modules")).toBeInTheDocument();
     expect(within(tree).getByText("ignored")).toBeInTheDocument();
     expect(within(tree).queryByText("routes.py")).not.toBeInTheDocument();
-    await userEvent.click(within(tree).getByRole("button", { name: "Expand demo" }));
+    await userEvent.click(within(tree).getByRole("button", { name: "Expand shop" }));
     await userEvent.click(within(tree).getByRole("button", { name: "Expand api" }));
     expect(within(tree).getByRole("link", { name: "routes.py" })).toHaveAttribute(
       "href",
-      `https://github.com/octo/demo/blob/${report.analysis.commit_sha}/demo/api/routes.py`,
+      `https://github.com/octo/demo/blob/${report.analysis.commit_sha}/shop/api/routes.py`,
     );
   });
 
@@ -67,11 +67,11 @@ describe("Architecture", () => {
     render(<Dashboard report={report} />);
     const arch = screen.getByRole("region", { name: "Architecture" });
     const graph = within(arch).getByRole("group", { name: "Module dependency graph" });
-    const services = within(graph).getByRole("button", { name: /^demo\/services,/ });
+    const services = within(graph).getByRole("button", { name: /^shop\/services,/ });
     await userEvent.click(services);
     expect(services).toHaveAttribute("aria-pressed", "true");
     const details = within(arch).getByText("Imported by (2)").parentElement!;
-    expect(within(details).getByRole("button", { name: "demo/api" })).toBeInTheDocument();
+    expect(within(details).getByRole("button", { name: "shop/api" })).toBeInTheDocument();
     expect(within(details).getByRole("button", { name: "tests" })).toBeInTheDocument();
     expect(within(arch).getByText("FastAPI")).toBeInTheDocument();
   });

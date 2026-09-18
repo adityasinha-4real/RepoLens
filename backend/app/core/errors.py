@@ -32,11 +32,6 @@ class RepositoryUnavailableError(RepoLensError):
     status_code = 403
 
 
-class RepositoryTooLargeError(RepoLensError):
-    code = "repository_too_large"
-    status_code = 413
-
-
 class RateLimitedError(RepoLensError):
     code = "rate_limited"
     status_code = 429

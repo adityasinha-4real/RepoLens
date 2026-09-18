@@ -1,6 +1,6 @@
 [project]
 name = "repolens-backend"
-version = "0.1.0"
+version = "1.0.0"
 description = "RepoLens analysis API: deterministic static analysis of public GitHub repositories."
 readme = "README.md"
 license = { text = "MIT" }

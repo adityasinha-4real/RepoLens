@@ -19,9 +19,9 @@ from tests.test_pipeline import REPO_FILES
 
 VALID = {
     "purpose": "A demo FastAPI service.",
-    "architecture": "demo/api calls demo/services.",
-    "key_modules": [{"path": "demo/services", "description": "User lookups."}],
-    "entry_points": ["demo/cli.py"],
+    "architecture": "shop/api calls shop/services.",
+    "key_modules": [{"path": "shop/services", "description": "User lookups."}],
+    "entry_points": ["shop/cli.py"],
     "maintenance_concerns": ["Pin the Docker base image."],
     "onboarding_steps": ["Read README.md", "Run pytest"],
 }
@@ -70,8 +70,8 @@ def test_digest_contains_analysis_not_file_contents() -> None:
     assert "def get_user" not in text and "paginate" not in text  # no raw source code
     desc = digest["repository"]["description"]
     assert "\x00" not in desc and "\x07" not in desc and len(desc) <= 200
-    assert {m["path"] for m in digest["modules"]} >= {"demo/api", "demo/services"}
-    assert {"from": "demo/api", "to": "demo/services", "count": 1} in digest["module_imports"]
+    assert {m["path"] for m in digest["modules"]} >= {"shop/api", "shop/services"}
+    assert {"from": "shop/api", "to": "shop/services", "count": 1} in digest["module_imports"]
 
 
 @pytest.mark.anyio
@@ -130,7 +130,7 @@ def test_ai_summary_endpoint_uses_cached_report_and_caches_summary() -> None:
             "/api/ai/summary", json={"repository_url": "https://github.com/octo/demo"}
         )
     assert first.status_code == 200 and second.status_code == 200
-    assert first.json()["key_modules"][0]["path"] == "demo/services"
+    assert first.json()["key_modules"][0]["path"] == "shop/services"
     assert len(provider.calls) == 1  # summary cached per commit
     assert (
         sum(1 for r in fake.requests if r.url.host == "api.github.com") == api_calls_after_analysis

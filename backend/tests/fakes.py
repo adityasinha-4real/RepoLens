@@ -4,7 +4,6 @@ It serves real HTTP responses so the production client code (header handling, st
 JSON parsing, redirects) runs unmodified in tests.
 """
 
-import base64
 import json
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -147,7 +146,3 @@ def _json(data: object, status: int = 200, headers: dict | None = None) -> httpx
 
 def json_response(data: object, status: int = 200, headers: dict | None = None) -> httpx.Response:
     return _json(data, status, headers)
-
-
-def b64(text: str) -> str:
-    return base64.b64encode(text.encode()).decode()

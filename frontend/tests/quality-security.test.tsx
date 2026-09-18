@@ -18,8 +18,8 @@ function withFindings(extra: SecurityFinding[]): AnalysisReport {
 describe("QualityPanel", () => {
   it("links markers to the exact line at the analyzed commit", () => {
     render(<QualityPanel report={base} />);
-    const link = screen.getByRole("link", { name: "demo/api/routes.py:5" });
-    expect(link).toHaveAttribute("href", `https://github.com/octo/demo/blob/${base.analysis.commit_sha}/demo/api/routes.py#L5`);
+    const link = screen.getByRole("link", { name: "shop/api/routes.py:5" });
+    expect(link).toHaveAttribute("href", `https://github.com/octo/demo/blob/${base.analysis.commit_sha}/shop/api/routes.py#L5`);
     expect(screen.getByText("TODO: paginate")).toBeInTheDocument();
     expect(screen.getByText(base.quality.coverage_note)).toBeInTheDocument();
   });

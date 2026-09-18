@@ -230,3 +230,29 @@ def test_sensitive_files_in_fixtures_are_aggregated() -> None:
     assert len(summary) == 1 and summary[0].severity == "info"
     assert "+8 more" in summary[0].title  # 11 in test paths: 3 listed, 8 summarized
     assert len(sensitive) == 5
+
+
+def test_code_rules_ignore_strings_and_comments_and_local_hosts() -> None:
+    text = "\n".join(
+        [
+            'DESCRIPTION = "eval()/exec() on untrusted input is dangerous"',
+            "# never call pickle.loads(data) on user input",
+            "result = eval(expression)  # flagged: a real call",
+        ]
+    )
+    findings = [f for f in scan_file("rules.py", text) if f.rule.startswith("code.")]
+    assert [(f.rule, f.line) for f in findings] == [("code.python-eval", 3)]
+    compose = scan_file("app/config.py", 'API = "http://api:8000/v1"')
+    assert not [f for f in compose if f.rule == "transport.insecure-http"]
+
+
+def test_env_inventory_ignores_test_and_example_files() -> None:
+    files = {
+        "src/app.ts": "const u = process.env.DATABASE_URL;",
+        "tests/app.test.ts": "process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY = 'x';",
+        "examples/demo.py": "import os\nos.getenv('SPAM')",
+    }
+    tree = RepositoryTree("sha", [TreeEntry(p, "file", len(t)) for p, t in files.items()])
+    result = analyze_security(tree, files, has_lockfiles=True)
+    assert result.env_variables == ["DATABASE_URL"]
+    assert not [f for f in result.findings if f.rule == "env.client-exposed-secret"]

@@ -22,11 +22,6 @@ export function formatBytes(bytes: number | null | undefined): string {
   return `${value >= 10 || unit === 0 ? Math.round(value) : value.toFixed(1)} ${units[unit]}`;
 }
 
-export function formatPercent(value: number | null | undefined, digits = 1): string {
-  if (value === null || value === undefined) return "—";
-  return `${value.toFixed(digits)}%`;
-}
-
 const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 const DIVISIONS: [number, Intl.RelativeTimeFormatUnit][] = [
   [60, "second"], [60, "minute"], [24, "hour"], [7, "day"], [4.34524, "week"], [12, "month"],
