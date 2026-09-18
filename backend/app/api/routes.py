@@ -116,7 +116,7 @@ async def cached_analysis(
 
 def enforce_rate_limit(request: Request, settings: Settings, kind: str) -> None:
     limiter = request.app.state.ai_limiter if kind == "ai" else request.app.state.analysis_limiter
-    retry_after = limiter.check(client_id(request, settings.trust_proxy_headers))
+    retry_after = limiter.check(client_id(request, settings))
     if retry_after is not None:
         what = "AI summaries" if kind == "ai" else "analyses"
         raise TooManyRequestsError(

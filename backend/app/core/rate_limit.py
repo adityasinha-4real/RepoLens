@@ -4,6 +4,8 @@ Per-process state is enough for a single instance (the free-tier deployment mode
 several replicas, put a shared limiter (e.g. at the proxy/CDN) in front instead.
 """
 
+import hmac
+import ipaddress
 import math
 import time
 from collections import deque
@@ -11,7 +13,11 @@ from collections.abc import Callable
 
 from fastapi import Request
 
+from app.core.config import Settings
+
 MAX_TRACKED_CLIENTS = 10_000
+PROXY_SECRET_HEADER = "x-repolens-proxy-secret"  # noqa: S105 - a header name, not a secret
+PROXY_CLIENT_IP_HEADER = "x-repolens-client-ip"
 
 
 class SlidingWindowLimiter:
@@ -47,12 +53,31 @@ class SlidingWindowLimiter:
             self._hits.pop(next(iter(self._hits)))
 
 
-def client_id(request: Request, trust_proxy_headers: bool) -> str:
-    """The caller's IP. X-Forwarded-For is only honored behind a trusted proxy, because
-    clients can set it to anything."""
-    if trust_proxy_headers:
-        forwarded = request.headers.get("x-forwarded-for", "")
-        first = forwarded.split(",")[0].strip()
-        if first:
-            return first[:64]
+def _valid_ip(value: str) -> str | None:
+    try:
+        return str(ipaddress.ip_address(value.strip()))
+    except ValueError:
+        return None
+
+
+def client_id(request: Request, settings: Settings) -> str:
+    """The caller's IP for rate limiting. Headers are trusted only when it is safe to:
+
+    1. PROXY_SHARED_SECRET set and the request carries it: use X-RepoLens-Client-IP, which the
+       RepoLens frontend proxy fills in (works even when the API itself is publicly reachable).
+    2. TRUST_PROXY_HEADERS: use the first X-Forwarded-For entry. Only for deployments where
+       the API is reachable exclusively through a trusted proxy (e.g. a private network).
+    3. Otherwise the TCP peer address.
+    """
+    secret = settings.proxy_shared_secret
+    if secret is not None:
+        supplied = request.headers.get(PROXY_SECRET_HEADER, "")
+        if supplied and hmac.compare_digest(supplied.encode(), secret.get_secret_value().encode()):
+            ip = _valid_ip(request.headers.get(PROXY_CLIENT_IP_HEADER, ""))
+            if ip:
+                return ip
+    if settings.trust_proxy_headers:
+        ip = _valid_ip(request.headers.get("x-forwarded-for", "").split(",")[0])
+        if ip:
+            return ip
     return request.client.host if request.client else "unknown"

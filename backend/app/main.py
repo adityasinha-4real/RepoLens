@@ -118,7 +118,7 @@ def create_app(
                 request.url.path,
                 response.status_code,
                 (time.perf_counter() - started) * 1000,
-                client_id(request, settings.trust_proxy_headers),
+                client_id(request, settings),
                 request_id,
             )
         return response

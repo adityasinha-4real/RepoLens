@@ -145,3 +145,22 @@ def test_analysis_timeout_returns_504() -> None:
         response = client.post("/api/analyze", json={"repository_url": "octo/demo"})
     assert response.status_code == 504
     assert response.json()["error"]["code"] == "analysis_timeout"
+
+
+def test_proxy_secret_controls_client_ip_trust() -> None:
+    def hit(client: TestClient, ip: str, secret: str | None) -> int:
+        headers = {"X-RepoLens-Client-IP": ip}
+        if secret:
+            headers["X-RepoLens-Proxy-Secret"] = secret
+        return client.post(
+            "/api/analyze", json={"repository_url": "octo/demo"}, headers=headers
+        ).status_code
+
+    with make(rate_limit_per_minute=1, proxy_shared_secret="s3cret-value") as client:
+        assert hit(client, "1.1.1.1", "s3cret-value") == 200
+        assert hit(client, "2.2.2.2", "s3cret-value") == 200  # distinct real clients
+        assert hit(client, "1.1.1.1", "s3cret-value") == 429
+        # Without (or with a wrong) secret the header is ignored: TCP peer is the identity.
+        assert hit(client, "3.3.3.3", "wrong") == 200
+        assert hit(client, "4.4.4.4", None) == 429
+        assert hit(client, "not-an-ip", "s3cret-value") == 429  # invalid IP falls back

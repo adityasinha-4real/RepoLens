@@ -1,0 +1,22 @@
+name: Incorrect analysis result
+description: A security indicator, dependency, module relationship or metric is wrong
+labels: [analysis-accuracy]
+body:
+  - type: input
+    id: repository
+    attributes:
+      label: Analyzed repository and commit
+      placeholder: https://github.com/owner/repo @ abc1234
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: File and line (if applicable)
+  - type: textarea
+    id: details
+    attributes:
+      label: What is incorrect and why?
+      description: Please do not paste real secrets. Security indicator evidence in RepoLens is already redacted.
+    validations:
+      required: true

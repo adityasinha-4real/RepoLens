@@ -1,0 +1,32 @@
+name: Bug report
+description: Something in RepoLens is broken or produces a wrong result
+labels: [bug]
+body:
+  - type: input
+    id: repository
+    attributes:
+      label: Analyzed repository
+      description: The public repository URL you analyzed (if relevant).
+      placeholder: https://github.com/owner/repo
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: "Include the error code shown in the UI (e.g. `code: upstream_error`) or the wrong value you saw."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Structure, Languages, Dependencies, Code quality, Documentation, Security indicators, Architecture, Health report, AI summary, Export, UI, API, Deployment]
+  - type: input
+    id: version
+    attributes:
+      label: RepoLens version or commit

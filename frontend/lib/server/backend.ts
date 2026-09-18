@@ -10,8 +10,20 @@ export function jsonError(status: number, code: string, message: string): Respon
   return Response.json({ error: { code, message, details: {} } }, { status });
 }
 
-/** Forward the caller's IP so the backend can apply per-client rate limits. */
+/**
+ * Tell the backend who the real client is, so per-client rate limits work behind this proxy.
+ * The client IP is only trusted by the backend when REPOLENS_PROXY_SECRET matches its
+ * PROXY_SHARED_SECRET (or, on private networks, when it sets TRUST_PROXY_HEADERS).
+ */
 export function forwardedFor(request: Request): Record<string, string> {
-  const forwarded = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip");
-  return forwarded ? { "X-Forwarded-For": forwarded.split(",")[0].trim() } : {};
+  const raw = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip");
+  const ip = raw?.split(",")[0].trim();
+  const headers: Record<string, string> = {};
+  if (ip) {
+    headers["X-Forwarded-For"] = ip;
+    headers["X-RepoLens-Client-IP"] = ip;
+  }
+  const secret = process.env.REPOLENS_PROXY_SECRET;
+  if (secret) headers["X-RepoLens-Proxy-Secret"] = secret;
+  return headers;
 }

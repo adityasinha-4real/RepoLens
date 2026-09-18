@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     rate_limit_per_minute: int = Field(default=10, ge=0)  # analyses per client per minute
     ai_rate_limit_per_hour: int = Field(default=20, ge=0)  # AI summaries per client per hour
     trust_proxy_headers: bool = False  # honor X-Forwarded-For (only behind a trusted proxy)
+    # Shared secret between the RepoLens frontend proxy and this API. When set, the client IP
+    # the frontend reports in X-RepoLens-Client-IP is trusted only if the secret matches.
+    proxy_shared_secret: SecretStr | None = None
     max_concurrent_analyses: int = Field(default=4, ge=1, le=64)
     analysis_timeout_seconds: float = Field(default=110, gt=0, le=600)
     max_request_bytes: int = Field(default=16_384, gt=0)
@@ -56,7 +59,13 @@ class Settings(BaseSettings):
         return value
 
     @field_validator(
-        "github_token", "ai_api_key", "ai_provider", "ai_model", "ai_base_url", mode="before"
+        "github_token",
+        "ai_api_key",
+        "ai_provider",
+        "ai_model",
+        "ai_base_url",
+        "proxy_shared_secret",
+        mode="before",
     )
     @classmethod
     def _empty_as_none(cls, value: object) -> object:

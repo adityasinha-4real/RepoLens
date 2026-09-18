@@ -1,0 +1,26 @@
+# Full stack for local use: docker compose up --build, then open http://localhost:3000
+# The API is only reachable through the frontend (its port is not published), which is why
+# it can safely trust the X-Forwarded-For header set by the frontend proxy.
+services:
+  api:
+    build: ./backend
+    environment:
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      TRUST_PROXY_HEADERS: "true"
+      CORS_ORIGINS: http://localhost:3000
+      AI_PROVIDER: ${AI_PROVIDER:-}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-}
+      AI_BASE_URL: ${AI_BASE_URL:-}
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    environment:
+      REPOLENS_API_URL: http://api:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
